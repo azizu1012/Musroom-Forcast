@@ -71,6 +71,9 @@ export function getRetentionStats() {
  * Schedule automated daily retention check
  */
 export function initRetentionScheduler() {
+  // On Vercel Serverless, background timers are suspended, so skip setInterval
+  if (process.env.VERCEL) return;
+
   // Execute immediately on startup
   console.log('[RETENTION] Running startup 3-year data retention sweep...');
   const res = purgeOldRecords();

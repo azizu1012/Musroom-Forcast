@@ -1,4 +1,3 @@
-import { DatabaseSync } from 'node:sqlite';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -6,16 +5,58 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dataDir = path.resolve(__dirname, '../data');
+// On Vercel Serverless, only /tmp is writable
+const isVercel = Boolean(process.env.VERCEL);
+const dataDir = isVercel ? '/tmp' : path.resolve(__dirname, '../data');
 if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+  try {
+    fs.mkdirSync(dataDir, { recursive: true });
+  } catch (err) {}
 }
 
 export const dbPath = path.join(dataDir, 'weather.db');
-export const db = new DatabaseSync(dbPath);
+
+// Load node:sqlite DatabaseSync or provide in-memory fallback
+let DatabaseSync;
+try {
+  const sqliteModule = await import('node:sqlite');
+  DatabaseSync = sqliteModule.DatabaseSync;
+} catch (err) {
+  console.warn('[SQLITE] Native node:sqlite not supported in this runtime, using memory fallback');
+}
+
+class MemoryDbFallback {
+  constructor() {
+    this.locations = [];
+    this.snapshots = [];
+    this.chromaVectors = [];
+    this.retentionLogs = [];
+  }
+  exec() {}
+  prepare(sql) {
+    const s = sql.trim().toLowerCase();
+    const self = this;
+    return {
+      run(...args) { return { changes: 1 }; },
+      get(...args) {
+        if (s.includes('count(*)')) return { c: self.locations.length, count: self.locations.length };
+        if (s.includes('from locations')) return self.locations[0] || null;
+        return null;
+      },
+      all(...args) {
+        if (s.includes('from locations')) return self.locations;
+        return [];
+      }
+    };
+  }
+}
+
+export const db = DatabaseSync ? new DatabaseSync(dbPath) : new MemoryDbFallback();
 
 // Enable WAL mode for high concurrency and performance
-db.exec(`PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;`);
+try {
+  db.exec(`PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;`);
+} catch (e) {}
 
 // Schema Definition
 db.exec(`

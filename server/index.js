@@ -338,8 +338,12 @@ if (fs.existsSync(distDir)) {
 // Secure Error Handler
 app.use(secureErrorHandler);
 
-app.listen(PORT, () => {
-  console.log(`[WEATHER APP SERVER] Server running on http://localhost:${PORT}`);
-  console.log(`[DATABASE] SQLite file: ${dbPath}`);
-  console.log(`[SECURITY] Helmet & Reverse Proxy Active. Sensitive headers masked.`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`[WEATHER APP SERVER] Server running on http://localhost:${PORT}`);
+    console.log(`[DATABASE] SQLite file: ${dbPath}`);
+    console.log(`[SECURITY] Helmet & Reverse Proxy Active. Sensitive headers masked.`);
+  });
+}
+
+export default app;

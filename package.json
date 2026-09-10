@@ -5,6 +5,9 @@
   "description": "Premium dynamic weather forecasting application with 16-day Open-Meteo predictions, 3-year SQLite .db historical retention, CRUD, and isolated runtime",
   "main": "server/index.js",
   "type": "module",
+  "engines": {
+    "node": ">=22.x"
+  },
   "scripts": {
     "dev": "concurrently -n \"API,WEB\" -c \"blue,green\" \"node server/index.js\" \"vite --port 3000\"",
     "start": "node server/index.js",
