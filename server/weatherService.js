@@ -22,38 +22,97 @@ function setCached(key, data) {
 }
 
 /**
- * Geocoding Search: Search cities by query string
+ * Geocoding Search: Dual OpenStreetMap Nominatim & Open-Meteo engine
+ * Accurately finds every Phường, Xã, Thị trấn across Vietnam
  */
 export async function searchLocations(query) {
   if (!query || query.trim().length < 2) return [];
 
-  const cacheKey = `geo_${query.trim().toLowerCase()}`;
+  const rawQuery = query.trim();
+  const cacheKey = `geo_vn_${rawQuery.toLowerCase()}`;
   const cached = getCached(cacheKey, 3600);
   if (cached) return cached;
 
-  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query.trim())}&count=8&language=en&format=json`;
+  const results = [];
+  const seenCoords = new Set();
 
-  try {
-    const res = await fetch(url, { headers: { 'User-Agent': 'WeatherApp-Pulse/1.0' } });
-    if (!res.ok) throw new Error(`Geocoding failed with status ${res.status}`);
-    const data = await res.json();
-    const results = (data.results || []).map(item => ({
-      id: item.id,
-      name: item.name,
-      latitude: item.latitude,
-      longitude: item.longitude,
-      country: item.country || '',
-      admin1: item.admin1 || '',
-      timezone: item.timezone || 'auto',
-      population: item.population || 0
-    }));
+  function addResult(item) {
+    const lat = parseFloat(item.latitude || item.lat);
+    const lon = parseFloat(item.longitude || item.lon);
+    if (isNaN(lat) || isNaN(lon)) return;
 
-    setCached(cacheKey, results);
-    return results;
-  } catch (error) {
-    console.error('[WEATHER SERVICE] Geocoding error:', error.message);
-    throw error;
+    // Deduplicate within ~1km
+    const coordKey = `${lat.toFixed(2)}_${lon.toFixed(2)}`;
+    if (seenCoords.has(coordKey)) return;
+    seenCoords.add(coordKey);
+
+    const name = item.name || '';
+    const admin1 = item.admin1 || item.address?.state || item.address?.city || 'Việt Nam';
+    
+    // Determine region
+    let region = 'Miền Nam';
+    const combined = `${name} ${admin1}`.toLowerCase();
+    if (combined.includes('hồ chí minh') || combined.includes('thủ đức') || combined.includes('sai gon')) {
+      region = 'TP.HCM';
+    } else if (combined.includes('hà nội')) {
+      region = 'Hà Nội';
+    } else if (lat >= 19.5) {
+      region = 'Miền Bắc';
+    } else if (lat >= 11.5 && lat < 19.5) {
+      region = 'Miền Trung';
+    }
+
+    results.push({
+      id: item.id || `osm_${Date.now()}_${results.length}`,
+      name: name,
+      latitude: parseFloat(lat.toFixed(4)),
+      longitude: parseFloat(lon.toFixed(4)),
+      country: 'Vietnam',
+      admin1: admin1,
+      region: region,
+      timezone: 'Asia/Ho_Chi_Minh',
+      display_name: item.display_name || `${name}, ${admin1}`
+    });
   }
+
+  // 1. Primary: Nominatim OpenStreetMap for precise Vietnamese administrative wards (Phường / Xã)
+  try {
+    const osmUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(rawQuery)}&countrycodes=vn&format=json&addressdetails=1&limit=6`;
+    const osmRes = await fetch(osmUrl, {
+      headers: { 'User-Agent': 'PulseWeatherVietnam/1.0 (contact@pulseweather.local)' }
+    });
+    if (osmRes.ok) {
+      const osmData = await osmRes.json();
+      for (const item of osmData) {
+        addResult({
+          name: item.name || item.display_name.split(',')[0],
+          lat: item.lat,
+          lon: item.lon,
+          admin1: item.address?.city || item.address?.state || item.address?.province || '',
+          display_name: item.display_name
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('[WEATHER SERVICE] Nominatim lookup warning:', err.message);
+  }
+
+  // 2. Secondary: Open-Meteo Geocoding
+  try {
+    const omUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(rawQuery)}&count=6&language=vi&format=json&country_code=VN`;
+    const omRes = await fetch(omUrl, { headers: { 'User-Agent': 'WeatherApp-Pulse/1.0' } });
+    if (omRes.ok) {
+      const omData = await omRes.json();
+      for (const item of (omData.results || [])) {
+        addResult(item);
+      }
+    }
+  } catch (err) {
+    console.warn('[WEATHER SERVICE] Open-Meteo geocoding warning:', err.message);
+  }
+
+  setCached(cacheKey, results);
+  return results;
 }
 
 /**

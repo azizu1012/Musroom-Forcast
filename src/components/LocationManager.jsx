@@ -7,7 +7,9 @@ import {
   MapPin, 
   Search, 
   X,
-  Plus
+  Plus,
+  Globe,
+  Loader2
 } from 'lucide-react';
 import { createFuzzySearchEngine, removeVietnameseTones } from '../utils/searchEngine';
 
@@ -19,10 +21,15 @@ export default function LocationManager({
   onUpdateLocation,
   onDeleteLocation
 }) {
-  const [filterRegion, setFilterRegion] = useState('all'); // 'all' | 'hcm' | 'south'
+  const [filterRegion, setFilterRegion] = useState('all'); // 'all' | 'hcm' | 'hanoi' | 'north' | 'central' | 'south'
   const [searchTerm, setSearchTerm] = useState('');
   const [editingLoc, setEditingLoc] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Online Geocoding Search state (for finding any ward/commune in Vietnam)
+  const [isSearchingOnline, setIsSearchingOnline] = useState(false);
+  const [onlineResults, setOnlineResults] = useState([]);
+  const [hasSearchedOnline, setHasSearchedOnline] = useState(false);
 
   // New location form state
   const [newLocForm, setNewLocForm] = useState({
@@ -42,6 +49,18 @@ export default function LocationManager({
     is_favorite: 0
   });
 
+  // Region Counts
+  const counts = useMemo(() => {
+    return {
+      all: locations.length,
+      hcm: locations.filter((loc) => loc.region === 'TP.HCM' || loc.admin1?.includes('Hồ Chí Minh') || loc.admin1?.includes('Thủ Đức')).length,
+      hanoi: locations.filter((loc) => loc.region === 'Hà Nội' || loc.admin1?.includes('Hà Nội')).length,
+      north: locations.filter((loc) => loc.region === 'Miền Bắc').length,
+      central: locations.filter((loc) => loc.region === 'Miền Trung').length,
+      south: locations.filter((loc) => loc.region === 'Miền Nam').length,
+    };
+  }, [locations]);
+
   // 1. Build Fuse.js instance with enhanced typo tolerance & Vietnamese phonetics
   const fuzzyEngine = useMemo(() => {
     return createFuzzySearchEngine(locations);
@@ -57,6 +76,8 @@ export default function LocationManager({
     // Apply region tabs
     if (filterRegion === 'hcm') {
       list = list.filter((loc) => loc.region === 'TP.HCM' || loc.admin1?.includes('Hồ Chí Minh') || loc.admin1?.includes('Thủ Đức'));
+    } else if (filterRegion === 'hanoi') {
+      list = list.filter((loc) => loc.region === 'Hà Nội' || loc.admin1?.includes('Hà Nội'));
     } else if (filterRegion === 'north') {
       list = list.filter((loc) => loc.region === 'Miền Bắc');
     } else if (filterRegion === 'central') {
@@ -67,6 +88,40 @@ export default function LocationManager({
 
     return list;
   }, [searchTerm, filterRegion, fuzzyEngine, locations]);
+
+  // Handle Online Search for any ward/commune in Vietnam
+  const handleSearchOnline = async () => {
+    if (!searchTerm || searchTerm.trim().length < 2) return;
+    setIsSearchingOnline(true);
+    setHasSearchedOnline(true);
+    try {
+      const res = await fetch(`/api/weather/search?q=${encodeURIComponent(searchTerm.trim())}`);
+      if (!res.ok) throw new Error('Tìm kiếm trực tuyến thất bại');
+      const data = await res.json();
+      setOnlineResults(data);
+    } catch (err) {
+      console.error('[ONLINE SEARCH]', err);
+      setOnlineResults([]);
+    } finally {
+      setIsSearchingOnline(false);
+    }
+  };
+
+  const handleSelectOnlineResult = async (item) => {
+    await onAddLocation({
+      name: item.name,
+      latitude: item.latitude,
+      longitude: item.longitude,
+      country: 'Vietnam',
+      admin1: item.admin1 || 'Việt Nam',
+      region: item.region || 'Miền Nam',
+      custom_label: 'Bản đồ VN',
+      notes: item.display_name || ''
+    });
+    setOnlineResults([]);
+    setHasSearchedOnline(false);
+    setSearchTerm('');
+  };
 
   const handleOpenEdit = (loc, e) => {
     e.stopPropagation();
@@ -137,13 +192,21 @@ export default function LocationManager({
           <input
             type="text"
             className="apple-search-input"
-            placeholder="Tìm quận huyện, tỉnh (nhận diện gõ sai)..."
+            placeholder="Tìm phường, quận, tỉnh thành (nhận diện gõ sai)..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setHasSearchedOnline(false);
+              setOnlineResults([]);
+            }}
           />
           {searchTerm && (
             <button
-              onClick={() => setSearchTerm('')}
+              onClick={() => {
+                setSearchTerm('');
+                setHasSearchedOnline(false);
+                setOnlineResults([]);
+              }}
               style={{
                 position: 'absolute',
                 right: '0.65rem',
@@ -163,11 +226,12 @@ export default function LocationManager({
         {/* Region Filter Pills */}
         <div style={{ display: 'flex', gap: '0.3rem', overflowX: 'auto', paddingBottom: '2px' }}>
           {[
-            { id: 'all', label: `Tất cả (${locations.length})` },
-            { id: 'hcm', label: 'TP.HCM' },
-            { id: 'north', label: 'Miền Bắc' },
-            { id: 'central', label: 'Miền Trung' },
-            { id: 'south', label: 'Miền Nam' }
+            { id: 'all', label: `Tất cả (${counts.all})` },
+            { id: 'hcm', label: `TP.HCM (${counts.hcm})` },
+            { id: 'hanoi', label: `Hà Nội (${counts.hanoi})` },
+            { id: 'north', label: `Miền Bắc (${counts.north})` },
+            { id: 'central', label: `Miền Trung (${counts.central})` },
+            { id: 'south', label: `Miền Nam (${counts.south})` }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -189,9 +253,91 @@ export default function LocationManager({
 
       {/* Scrollable Location Cards List */}
       <div className="sidebar-scroll-list">
+        {/* Dynamic Online Geocoding Search option for any ward/commune in Vietnam */}
+        {searchTerm.trim().length >= 2 && (
+          <div style={{
+            padding: '0.5rem 0.65rem',
+            background: 'rgba(56, 189, 248, 0.08)',
+            borderRadius: '10px',
+            border: '1px solid rgba(56, 189, 248, 0.22)',
+            marginBottom: '0.65rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.4rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.76rem', color: 'var(--accent-blue)', fontWeight: 600 }}>
+                <Globe size={13} />
+                <span>Bản Đồ Mở Rộng Việt Nam</span>
+              </div>
+              <button
+                className="apple-btn-pill"
+                style={{
+                  fontSize: '0.7rem',
+                  padding: '0.22rem 0.55rem',
+                  background: 'var(--accent-blue)',
+                  color: '#fff',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  cursor: 'pointer'
+                }}
+                onClick={handleSearchOnline}
+                disabled={isSearchingOnline}
+              >
+                {isSearchingOnline ? <Loader2 size={11} className="apple-spinner" /> : <Search size={11} />}
+                <span>Tìm trực tuyến</span>
+              </button>
+            </div>
+
+            {hasSearchedOnline && (
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                {isSearchingOnline
+                  ? 'Đang tra cứu tọa độ toàn quốc...'
+                  : onlineResults.length === 0
+                  ? `Không tìm thấy thêm xã/phường cho "${searchTerm}"`
+                  : `Tìm thấy ${onlineResults.length} địa điểm trên bản đồ Việt Nam:`}
+              </div>
+            )}
+
+            {onlineResults.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', maxHeight: '140px', overflowY: 'auto' }}>
+                {onlineResults.map((item, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.35rem 0.5rem',
+                      background: 'rgba(255, 255, 255, 0.08)',
+                      borderRadius: '6px',
+                      fontSize: '0.74rem',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => handleSelectOnlineResult(item)}
+                  >
+                    <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '75%' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.name}</span>
+                      <span style={{ fontSize: '0.66rem', color: 'var(--text-tertiary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {item.admin1 || item.display_name}
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '0.68rem', color: 'var(--accent-blue)', fontWeight: 600 }}>+ Lưu</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {displayedLocations.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>
-            Không tìm thấy địa điểm phù hợp với "{searchTerm}"
+            Không tìm thấy địa điểm trong danh mục có sẵn với "{searchTerm}".
+            <div style={{ marginTop: '0.4rem', fontSize: '0.75rem' }}>
+              Hãy bấm <strong>Tìm trực tuyến</strong> ở trên để tra cứu tức thì trên toàn bộ bản đồ Việt Nam!
+            </div>
           </div>
         ) : (
           displayedLocations.map((loc) => {
