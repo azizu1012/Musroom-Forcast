@@ -29,6 +29,20 @@ app.disable('x-powered-by');
 app.use(securityHeaders);
 app.use(cors({ origin: true }));
 app.use(express.json({ limit: '50kb' })); // Restrict body payload size
+
+// Normalize URL prefix for Vercel Serverless rewrites
+app.use((req, res, next) => {
+  if (
+    !req.url.startsWith('/api') && 
+    !req.url.startsWith('/dist') && 
+    !req.url.startsWith('/assets') && 
+    !req.url.startsWith('/favicon.ico')
+  ) {
+    req.url = '/api' + (req.url.startsWith('/') ? req.url : '/' + req.url);
+  }
+  next();
+});
+
 app.use('/api/', apiLimiter);
 
 // Initialize 3-year retention scheduler

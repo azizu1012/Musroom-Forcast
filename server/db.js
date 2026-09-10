@@ -31,20 +31,78 @@ class MemoryDbFallback {
     this.snapshots = [];
     this.chromaVectors = [];
     this.retentionLogs = [];
+    this._nextLocId = 1;
+    this._nextSnapId = 1;
   }
-  exec() {}
+  exec(sql) {}
   prepare(sql) {
     const s = sql.trim().toLowerCase();
     const self = this;
     return {
-      run(...args) { return { changes: 1 }; },
+      run(...args) {
+        if (s.startsWith('insert into locations')) {
+          const newLoc = {
+            id: self._nextLocId++,
+            name: args[0],
+            latitude: args[1],
+            longitude: args[2],
+            country: 'Vietnam',
+            admin1: args[3] || '',
+            region: args[4] || '',
+            timezone: 'Asia/Ho_Chi_Minh',
+            custom_label: args[5] || '',
+            notes: '',
+            temp_unit: 'celsius',
+            alert_rain_threshold: 60,
+            is_favorite: args[6] || 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          self.locations.push(newLoc);
+          return { changes: 1, lastInsertRowid: newLoc.id };
+        }
+        if (s.startsWith('update locations set is_favorite = 1 where name =')) {
+          const match = sql.match(/where name = '([^']+)'/i);
+          const targetName = match ? match[1] : 'Phường Bến Nghé';
+          self.locations.forEach(l => {
+            if (l.name === targetName) l.is_favorite = 1;
+          });
+          return { changes: 1 };
+        }
+        if (s.startsWith('update locations')) {
+          return { changes: 1 };
+        }
+        if (s.startsWith('delete from locations')) {
+          const id = args[0];
+          self.locations = self.locations.filter(l => l.id !== id);
+          return { changes: 1 };
+        }
+        if (s.startsWith('insert into weather_snapshots')) {
+          const snap = { id: self._nextSnapId++, recorded_at: new Date().toISOString() };
+          self.snapshots.push(snap);
+          return { changes: 1, lastInsertRowid: snap.id };
+        }
+        return { changes: 1, lastInsertRowid: Date.now() };
+      },
       get(...args) {
-        if (s.includes('count(*)')) return { c: self.locations.length, count: self.locations.length };
+        if (s.includes('count(*)')) return { count: self.locations.length, c: self.locations.length };
+        if (s.includes('from locations where name =') || s.includes('where name = ?')) {
+          const name = args[0];
+          return self.locations.find(l => l.name === name) || null;
+        }
         if (s.includes('from locations')) return self.locations[0] || null;
+        if (s.includes('from weather_snapshots')) {
+          return self.snapshots[self.snapshots.length - 1] || null;
+        }
         return null;
       },
       all(...args) {
-        if (s.includes('from locations')) return self.locations;
+        if (s.includes('from locations')) {
+          return [...self.locations];
+        }
+        if (s.includes('from weather_snapshots')) {
+          return [...self.snapshots];
+        }
         return [];
       }
     };

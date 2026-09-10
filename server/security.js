@@ -13,7 +13,14 @@ export const securityHeaders = helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'"],
+      connectSrc: [
+        "'self'", 
+        "https://api.open-meteo.com", 
+        "https://air-quality-api.open-meteo.com", 
+        "https://geocoding-api.open-meteo.com", 
+        "https://archive-api.open-meteo.com", 
+        "https://nominatim.openstreetmap.org"
+      ],
       frameAncestors: ["'none'"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: [],
