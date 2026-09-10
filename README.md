@@ -1,120 +1,181 @@
-# PulseWeather - Enterprise Weather Forecast & Climate Intelligence Platform
+# 🍄 Mushroom Forecast (PulseWeather)
+### *Hệ Thống Dự Báo Khí Tượng & Vi Khí Hậu Tích Hợp ChromaDB Vector AI và Apple Weather UI*
 
-> **Hệ thống dự báo thời tiết cao cấp phong cách Apple Weather. Tích hợp dữ liệu Open-Meteo 16 ngày, lưu trữ và tự động dọn dẹp dữ liệu lịch sử 3 năm với SQLite native `.db`, bảo mật chuẩn Reverse Proxy, và môi trường Node.js cô lập cục bộ.**
+<div align="center">
+
+![Mushroom Forecast](https://img.shields.io/badge/Project-Mushroom--Forecast-ff69b4?style=for-the-badge&logo=target&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-v20%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-19.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Express](https://img.shields.io/badge/Express-5.0-000000?style=for-the-badge&logo=express&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-Native_WAL-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
+![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector_AI-FF6F61?style=for-the-badge&logo=databricks&logoColor=white)
+![Open-Meteo](https://img.shields.io/badge/Open--Meteo-Live_API-FF8000?style=for-the-badge&logo=metabase&logoColor=white)
+![OpenStreetMap](https://img.shields.io/badge/OSM-Nominatim_Geo-7EBC6F?style=for-the-badge&logo=openstreetmap&logoColor=white)
+![Security](https://img.shields.io/badge/Security-Helmet_Hardened-10B981?style=for-the-badge&logo=shield&logoColor=white)
+![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge&logo=open-source-initiative&logoColor=white)
+![Author](https://img.shields.io/badge/Author-azizu1012-8B5CF6?style=for-the-badge&logo=github&logoColor=white)
+![Vietnam Coverage](https://img.shields.io/badge/Vietnam-63_Provinces_%26_180%2B_Wards-EF4444?style=for-the-badge&logo=googlemaps&logoColor=white)
+
+</div>
 
 ---
 
-## 📑 Mục Lục Tài Liệu Kỹ Thuật
+## 🌟 Giới Thiệu Dự Án (Overview)
 
-Dự án được xây dựng theo tiêu chuẩn kiến trúc phần mềm cao cấp với tài liệu chi tiết cho từng phân hệ:
-- 📖 [Backend Architecture Guide](file:///d:/Demo%20capstone/server/README.md) - Tài liệu kiến trúc máy chủ, SQLite schema, bộ dọn dẹp 3 năm và bảo mật.
-- 🎨 [Frontend Component & Design System Guide](file:///d:/Demo%20capstone/src/README.md) - Tài liệu hệ thống giao diện Apple Weather, Spectrum Bar và cách phát triển widgets mới.
+**Mushroom Forecast** là nền tảng dự báo thời tiết và phân tích vi khí hậu thế hệ mới, được thiết kế chuyên biệt cho việc theo dõi thời tiết thực tế và các chỉ số vi khí hậu quan trọng (độ ẩm cao, sương mù, điểm sương, áp suất khí quyển, lượng mưa tích lũy) phục vụ đời sống và nông nghiệp công nghệ cao (đặc biệt là mô hình nuôi trồng nấm).
+
+Dự án áp dụng ngôn ngữ thiết kế **Apple Weather Glassmorphism** (macOS & iPadOS), tích hợp động cơ **ChromaDB Vector AI** cho phép tìm kiếm thời tiết bằng ngôn ngữ tự nhiên, hệ thống cơ sở dữ liệu **SQLite ACID native WAL** với cơ chế tự động dọn dẹp lưu trữ 3 năm, và thuật toán tìm kiếm mờ dung sai lỗi chính tả (Typo-Tolerant Fuzzy Search).
 
 ---
 
-## ⚡ Hướng Dẫn Vận Hành & Khởi Động
+## 🚀 Tính Năng Cốt Lõi (Key Highlights)
 
-### 1. Khởi chạy 1-Click (Môi trường Windows cô lập)
-Nhấp đúp chuột vào file:
-```bat
+### 1. 🧠 ChromaDB Vector AI & Semantic Weather Search
+- **Truy vấn ngôn ngữ tự nhiên**: Cho phép tra cứu các hình thái khí hậu thông minh mà không cần gõ từ khóa chính xác:
+  - *"Độ ẩm rất cao thích hợp cho nuôi trồng nấm"*
+  - *"Dông bão gió giật mạnh và sấm sét"*
+  - *"Nắng nóng đỉnh điểm oi bức kéo dài"*
+  - *"Thời tiết se lạnh sương mù Đà Lạt / Sa Pa"*
+- **Cơ chế hoạt động kép (Dual Engine)**:
+  - Kết nối trực tiếp máy chủ **ChromaDB Remote Daemon** (`http://localhost:8000`).
+  - Tự động chuyển đổi sang **Embedded Vector Cosine Similarity Engine** nội bộ nếu Chroma daemon offline, đảm bảo ứng dụng luôn chạy 100% độc lập không gián đoạn.
+- **Đồng bộ hóa tức thì**: Endpoint `POST /api/chroma/sync` tự động vectorize toàn bộ dữ liệu lịch sử và chỉ số vi khí hậu.
+
+### 2. 🍏 Giao Diện Apple Weather (iOS / macOS Glassmorphism)
+- **Thiết kế Master-Detail 2 cột**: Tự động scale theo tỷ lệ màn hình (`clamp()`), cột bên trái quản lý danh sách địa phương, cột bên phải là dashboard thời tiết với kính mờ `backdrop-filter: blur(40px)`.
+- **Dự Báo Hàng Ngày (Apple Daily Forecast)**: Mặc định hiển thị gọn gàng **8 ngày** (Hôm nay kèm badge `Hiện tại` + 7 ngày tiếp theo), tích hợp nút bấm mở rộng toàn chuỗi **16 ngày** kèm thanh phổ nhiệt độ Apple Spectrum Bar.
+- **8 Modular Widgets chuyên sâu**:
+  1. *Chất lượng không khí (AQI)*: Phân tích nồng độ $PM2.5$, $PM10$, $O_3$, $NO_2$.
+  2. *Chỉ số UV & Đỉnh nắng*: Chỉ số hiện tại và đỉnh bức xạ trong ngày (UV Max).
+  3. *Mặt trời lặn & Bình minh*: Giờ lặn, chu kỳ sáng và giờ mọc hôm sau.
+  4. *Gió & Gió giật*: Tốc độ trung bình, gió giật cực đại (Wind Gusts) và la bàn số $360^\circ$.
+  5. *Lượng mưa 24 giờ*: Lượng mưa tích lũy ($mm$), xác suất mưa và số giờ mưa.
+  6. *Cảm giác như & Điểm sương*: Nhiệt độ cảm nhận kết hợp **Điểm sương (Dew Point)**.
+  7. *Tầm nhìn xa*: Khoảng cách quang đãng tính bằng $km$.
+  8. *Áp suất khí quyển*: Áp suất barometric bề mặt ($hPa$) và xu hướng khí quyển.
+
+### 3. 🗺️ Mạng Lưới 180+ Phường Chuẩn Xác & Toàn Bộ 63 Tỉnh Thành Việt Nam
+- **Cập nhật danh pháp hành chính mới**: Loại bỏ định dạng "quận" cũ lỗi thời, chuẩn hóa theo cấp **Phường / Thành phố trực thuộc**:
+  - *TP. Hồ Chí Minh (61 địa điểm)*: Bến Nghé, Bến Thành, Đa Kao, Tân Định, Phạm Ngũ Lão, Võ Thị Sáu, Thảo Điền, An Phú, Thủ Thiêm, Phú Mỹ Hưng (Tân Phong), Landmark 81 (Phường 22), v.v.
+  - *Thủ đô Hà Nội (17 địa điểm)*: Tràng Tiền, Hàng Bạc, Hàng Đào, Quán Thánh, Điện Biên, Liễu Giai, Dịch Vọng Hậu, Mỹ Đình, Mễ Trì, v.v.
+  - *Đô thị lớn & Du lịch*: Đà Nẵng, Hải Phòng, Cần Thơ, Thừa Thiên Huế, Nha Trang, Đà Lạt, Vũng Tàu, Phú Quốc, Sa Pa.
+  - *Toàn bộ 63 tỉnh thành*: Phủ sóng 100% lãnh thổ Việt Nam với tọa độ WGS84 chính xác.
+- **Bản Đồ Mở Rộng Việt Nam (Dynamic Geocoding)**: Tích hợp công cụ OpenStreetMap Nominatim (`countrycodes=vn`), cho phép tra cứu và lưu bất kỳ phường/xã/thị trấn đặc thù nào trên cả nước chỉ với 1 cú click.
+
+### 4. 🔍 Thuật Toán Tìm Kiếm Mờ Tiếng Việt (Fuse.js Diacritic-Folding)
+- Tự động nhận diện từ khóa viết tắt, gõ sai hoặc không dấu:
+  - `sapa` ➔ **Sa Pa (Lào Cai)**
+  - `da kao` ➔ **Phường Đa Kao (TP.HCM)**
+  - `hn` ➔ **Thủ đô Hà Nội**
+  - `my khe` ➔ **Phường An Hải Bắc (Đà Nẵng)**
+  - `dalat` ➔ **Phường 1 (Đà Lạt)**
+  - `vug tau` ➔ **Phường 1 / Phường 2 (Bà Rịa - Vũng Tàu)**
+
+### 5. 🛡️ Cơ Sở Dữ Liệu SQLite & Chính Sách Lưu Trữ 3 Năm (ACID Retention)
+- Sử dụng `node:sqlite` (DatabaseSync) với chế độ `PRAGMA journal_mode = WAL`.
+- Động cơ dọn dẹp dữ liệu tự động quét định kỳ: Chỉ lưu trữ lịch sử khí hậu tối đa 3 năm (`datetime('now', '-3 years')`), tối ưu hóa dung lượng lưu trữ cục bộ.
+- Bảo mật chuẩn công nghiệp: Helmet headers, rate limiting (120 req/min), chống XSS/SQL Injection, ẩn thông tin máy chủ nhạy cảm.
+
+---
+
+## 📐 Kiến Trúc Hệ Thống (System Architecture)
+
+```mermaid
+graph TD
+    Client["Trình Duyệt Web (React 19 + Apple Glassmorphism UI)"]
+    
+    subgraph "Server Layer (Node.js & Express 5)"
+        Sec["Security Layer (Helmet, CORS, Rate Limiters)"]
+        Router["API Gateway / Routers"]
+        
+        subgraph "Data & AI Engines"
+            SQLite["SQLite Engine (DatabaseSync WAL, weather.db)"]
+            Retention["3-Year Auto Retention Cron Sweep"]
+            Chroma["ChromaDB Vector AI Engine (weather_vectors)"]
+            OSM["OSM Nominatim & Open-Meteo Dual Geocoder"]
+            OpenMeteo["Open-Meteo Atmospheric Cache (5min TTL)"]
+        end
+    end
+    
+    Client --> Sec
+    Sec --> Router
+    Router --> SQLite
+    Router --> Chroma
+    Router --> OSM
+    Router --> OpenMeteo
+    SQLite --> Retention
+```
+
+---
+
+## 🛠️ Cài Đặt & Khởi Chạy (Quickstart)
+
+### Yêu Cầu Môi Trường
+- **Node.js**: Phiên bản 20+ (Dự án có sẵn runtime cô lập bên trong `.runtime/nodejs`).
+- **Hệ điều hành**: Windows / macOS / Linux.
+
+### Khởi Chạy Với Runtime Có Sẵn (Không Cần Cài Node Toàn Cục)
+Dự án đã được tích hợp sẵn script chạy tự động:
+```powershell
+# Chạy trực tiếp script PowerShell
+.\run.ps1
+
+# Hoặc chạy script Batch
 start.bat
 ```
-Hoặc khởi chạy từ PowerShell:
-```powershell
-.\run.ps1
-```
-Ứng dụng sẽ tự động kích hoạt binary Node.js trong `.runtime/nodejs`, thiết lập cấu hình và phục vụ tại: **http://localhost:5000**.
 
-### 2. Khởi chạy thủ công từ Terminal
+### Cài Đặt & Chạy Thủ Công (Standard NPM)
 ```bash
-# Thiết lập PATH ưu tiên runtime nội bộ của dự án
-set "PATH=%cd%\.runtime\nodejs;%PATH%"
+# 1. Cài đặt các thư viện phụ thuộc
+npm install
 
-# Đóng gói giao diện & khởi chạy máy chủ
+# 2. Xây dựng giao diện frontend Vite
 npm run build
-npm start
+
+# 3. Khởi động máy chủ backend và ứng dụng
+node server/index.js
 ```
+Ứng dụng sẽ khả dụng ngay tại: **`http://localhost:5000`**
 
 ---
 
-## 🏛️ Sơ Đồ Kiến Trúc Hệ Thống (System Architecture)
+## 🧪 Kiểm Thử Hệ Thống (Automated Testing)
 
+Chạy bộ kiểm thử tự động của Node.js:
+```bash
+node --test test/api.test.js
 ```
-[ Trình Duyệt Client (Apple Weather UI - React 19) ]
-                         │
-        (Reverse Proxy & Security Barrier)
-                         ▼
-        [ Express API Gateway (Port 5000) ]
-        ├── Helmet Security Headers
-        ├── Rate Limiting (120 req/min)
-        ├── Parameter Sanitizer & Error Masking
-        ├── SQLite Prepared Statements
-        │
-        ├──► [ data/weather.db (Native SQLite Database) ]
-        │     ├── Bảng locations (Tất cả quận TP.HCM & các tỉnh Miền Nam)
-        │     ├── Bảng weather_snapshots (Lưu lịch sử chu kỳ 3 năm)
-        │     └── Retention Engine (Cron tự động dọn dẹp bản ghi > 3 năm)
-        │
-        ├──► [ Chroma DB Vector Service ]
-        │     └── Collection weather_vectors (Truy vấn ngữ nghĩa & Fallback)
-        │
-        └──► [ Open-Meteo Gateway ]
-              ├── Geocoding Search API
-              ├── 16-Day Extended Forecast API (Tối đa giới hạn API)
-              ├── 24-Hour Hourly Timeline & AQI
-              └── Historical Archive API (Đối chiếu khí hậu 3 năm)
+Kết quả kiểm thử:
 ```
-
----
-
-## 📍 Hạt Giống Tọa Độ Khu Vực TP.HCM & Miền Nam
-
-Hệ thống được thiết lập sẵn tọa độ địa lý mới nhất của toàn bộ khu vực trọng điểm phía Nam:
-- **TP. Hồ Chí Minh (22 Quận/Huyện/TP):** Quận 1 *(mặc định)*, TP. Thủ Đức, Quận 3, Quận 4, Quận 5, Quận 6, Quận 7, Quận 8, Quận 10, Quận 11, Quận 12, Bình Thạnh, Gò Vấp, Phú Nhuận, Tân Bình, Tân Phú, Bình Tân, Nhà Bè, Hóc Môn, Củ Chi, Bình Chánh, Cần Giờ.
-- **Đông Nam Bộ:** Bình Dương, Đồng Nai, Bà Rịa - Vũng Tàu, Tây Ninh, Bình Phước.
-- **Đồng bằng Sông Cửu Long (Tây Nam Bộ):** Cần Thơ, Long An, Tiền Giang, Bến Tre, Trà Vinh, Vĩnh Long, Đồng Tháp, An Giang, Kiên Giang (Phú Quốc), Hậu Giang, Sóc Trăng, Bạc Liêu, Cà Mau.
-
----
-
-## 🍎 Ngôn Ngữ Thiết Kế Apple Weather (iOS / macOS)
-
-1. **Hiệu ứng khí quyển 100% Live:** Hoạt ảnh Canvas 60fps tự động thích ứng với diễn biến thời tiết thực tế (Trời nắng, Đêm sao, Mưa rơi, Sấm sét, Tuyết, Sương mù) dựa trên mã WMO Open-Meteo.
-2. **Apple Frosted Glass:** Hiệu ứng kính mờ đa lớp (`backdrop-filter: blur(40px) saturate(190%)`) với đường viền siêu mảnh tinh tế.
-3. **Thanh phổ nhiệt độ Apple Spectrum Bar:** Hiển thị dải nhiệt độ tối thiểu - tối đa trực quan cho chuỗi dự báo 16 ngày kèm điểm nhiệt độ hiện tại.
-4. **Mô-đun thông số 2 cột:** Chất lượng không khí (AQI), Chỉ số tia UV, Gió & La bàn, Mặt trời mọc/lặn, Cảm giác như, và Độ ẩm/Điểm sương.
-5. **Xu hướng khí hậu 3 năm:** Đối chiếu nhiệt độ hôm nay so với cùng ngày cách đây 1 năm, 2 năm và 3 năm.
-
----
-
-## 🛡️ Tiêu Chuẩn Bảo Mật & Bảo Vệ Thông Tin
-
-- **Zero Client Leakage:** Trình duyệt người dùng không trực tiếp gọi API ngoài; toàn bộ được xử lý qua reverse proxy ở backend.
-- **Helmet Headers:** Kích hoạt `Content-Security-Policy`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`.
-- **Rate Limiting:** Kiểm soát lưu lượng 120 req/phút toàn hệ thống nhằm phòng chống khai thác và DoS.
-- **SQL Injection Immunity:** 100% truy vấn cơ sở dữ liệu qua Prepared Statements.
-- **Error Masking:** Tuyệt đối không rò rỉ stack trace hay cấu trúc thư mục máy chủ khi có lỗi phát sinh.
+✔ Security Sanitization and Coordinates Validation (1.06ms)
+✔ SQLite Database CRUD operations for Locations (3.99ms)
+✔ 3-Year Historical Retention Policy Engine (7.40ms)
+ℹ tests 3, pass 3, fail 0
+```
 
 ---
 
 ## 📡 Danh Mục API (API Reference)
 
-| Giao thức | Đường dẫn | Chức năng |
-|---|---|---|
-| `GET` | `/api/locations` | Lấy danh sách địa điểm theo dõi đã lưu |
-| `POST` | `/api/locations` | Thêm địa điểm mới kèm nhãn, ghi chú, cảnh báo |
-| `PUT` | `/api/locations/:id` | Cập nhật nhãn, ghi chú, ngưỡng mưa, ưu tiên |
-| `DELETE` | `/api/locations/:id` | Xóa địa điểm khỏi cơ sở dữ liệu SQLite |
-| `GET` | `/api/weather/search?q=` | Tìm kiếm thành phố toàn cầu (Geocoding) |
-| `GET` | `/api/weather/forecast?lat=&lon=&city=` | Dự báo 16 ngày, 24 giờ chi tiết, và AQI |
-| `GET` | `/api/weather/compare-history?lat=&lon=` | Đối chiếu thời tiết hôm nay với 1, 2, 3 năm trước |
-| `GET` | `/api/system/status` | Báo cáo chẩn đoán dung lượng DB, retention và bảo mật |
-| `POST` | `/api/admin/cleanup` | Kích hoạt quét dọn dữ liệu lịch sử quá 3 năm |
+| Phương thức | Đường dẫn API | Mô tả |
+| :--- | :--- | :--- |
+| `GET` | `/api/system/status` | Trạng thái hệ thống, kích thước SQLite, trạng thái ChromaDB |
+| `GET` | `/api/locations` | Danh sách 180+ địa điểm lưu sẵn và tùy chỉnh |
+| `POST` | `/api/locations` | Thêm địa điểm mới (CRUD) |
+| `PUT` | `/api/locations/:id` | Cập nhật nhãn, ghi chú, yêu thích (CRUD) |
+| `DELETE` | `/api/locations/:id` | Xóa địa điểm (CRUD) |
+| `GET` | `/api/weather/forecast` | Dự báo 16 ngày, 24 giờ, 8 widget khí quyển chi tiết |
+| `GET` | `/api/weather/search` | Tìm kiếm địa danh OpenStreetMap Nominatim toàn quốc |
+| `GET` | `/api/chroma/status` | Kiểm tra trạng thái Vector Engine và số lượng vector |
+| `POST` | `/api/chroma/query` | Truy vấn ngữ nghĩa thời tiết thông minh (ChromaDB Vector Search) |
+| `POST` | `/api/chroma/sync` | Đồng bộ toàn bộ dữ liệu thời tiết vào Chroma Vector Database |
+| `POST` | `/api/admin/cleanup` | Kích hoạt chu kỳ dọn dẹp dữ liệu quá hạn 3 năm |
 
 ---
 
-## 🧪 Kiểm Thử Tự Động (Testing)
+## 📄 Giấy Phép & Tác Giả (License & Author)
 
-```bash
-npm test
-```
-Kiểm thử tự động bao gồm: Kiểm tra thẩm định tọa độ, lọc mã độc XSS, kiểm tra toàn diện CRUD trên SQLite, và xác minh thuật toán dọn dẹp dữ liệu quá 3 năm.
+- **Tác giả (Author)**: [azizu1012](https://github.com/azizu1012)
+- **Repository**: [https://github.com/azizu1012/Musroom-Forcast](https://github.com/azizu1012/Musroom-Forcast)
+- **Giấy phép (License)**: Dự án được phát hành theo giấy phép mã nguồn mở [MIT License](LICENSE).

@@ -5,7 +5,8 @@ import {
   RefreshCw, 
   Check, 
   Layers,
-  LayoutList
+  LayoutList,
+  Sparkles
 } from 'lucide-react';
 
 import WeatherCanvas from './components/WeatherCanvas';
@@ -16,6 +17,7 @@ import Forecast16Days from './components/Forecast16Days';
 import HistoricalComparator from './components/HistoricalComparator';
 import LocationManager from './components/LocationManager';
 import SystemModal from './components/SystemModal';
+import ChromaModal from './components/ChromaModal';
 
 export default function App() {
   // State
@@ -28,9 +30,42 @@ export default function App() {
   // Mobile sidebar toggle
   const [mobileShowSidebar, setMobileShowSidebar] = useState(true);
 
-  // System Modal & Toast
+  // System & Chroma Modal & Toast
   const [isSystemModalOpen, setIsSystemModalOpen] = useState(false);
+  const [isChromaModalOpen, setIsChromaModalOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
+
+  const handleSelectCityFromChroma = (cityName) => {
+    if (!cityName) return;
+    const cleanCity = cityName.toLowerCase();
+    const match = locations.find((l) => 
+      l.name.toLowerCase() === cleanCity || 
+      cleanCity.includes(l.name.toLowerCase()) || 
+      l.name.toLowerCase().includes(cleanCity)
+    );
+
+    if (match) {
+      setActiveLocation(match);
+      showToast(`Đã chọn: ${match.name} (Chroma Vector AI)`);
+    } else {
+      fetch(`/api/weather/search?q=${encodeURIComponent(cityName)}`)
+        .then((r) => r.json())
+        .then((res) => {
+          if (res && res.length > 0) {
+            handleAddLocation({
+              name: res[0].name,
+              latitude: res[0].latitude,
+              longitude: res[0].longitude,
+              country: 'Vietnam',
+              admin1: res[0].admin1,
+              region: res[0].region,
+              custom_label: 'Chroma AI Match'
+            });
+          }
+        })
+        .catch(() => {});
+    }
+  };
 
   const showToast = (message) => {
     const id = Date.now();
@@ -208,6 +243,25 @@ export default function App() {
               <RefreshCw size={15} className={loadingForecast ? 'animate-spin' : ''} />
             </button>
 
+            {/* ChromaDB Vector AI Modal Button */}
+            <button
+              className="apple-btn-pill"
+              style={{
+                background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.22), rgba(139, 92, 246, 0.22))',
+                borderColor: 'rgba(236, 72, 153, 0.45)',
+                color: '#f472b6',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem'
+              }}
+              onClick={() => setIsChromaModalOpen(true)}
+              title="ChromaDB Vector AI Search"
+            >
+              <Sparkles size={13} color="#f472b6" />
+              <span>Chroma AI</span>
+            </button>
+
             {/* System / Security Modal Button */}
             <button
               className="apple-btn-round"
@@ -270,6 +324,13 @@ export default function App() {
           isOpen={isSystemModalOpen}
           onClose={() => setIsSystemModalOpen(false)}
           onShowToast={showToast}
+        />
+
+        {/* ChromaDB AI Vector Search Modal */}
+        <ChromaModal
+          isOpen={isChromaModalOpen}
+          onClose={() => setIsChromaModalOpen(false)}
+          onSelectCity={handleSelectCityFromChroma}
         />
 
         {/* Apple Pill Toast Notification */}

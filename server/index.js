@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import { db, dbPath } from './db.js';
 import { initRetentionScheduler, purgeOldRecords, getRetentionStats } from './retention.js';
-import { getChromaStatus } from './chromaService.js';
+import { getChromaStatus, querySemanticWeather, syncAllSnapshotsToChroma } from './chromaService.js';
 import { searchLocations, getFullForecast, getHistoricalComparison } from './weatherService.js';
 import { 
   securityHeaders, 
@@ -74,6 +74,41 @@ app.get('/api/system/status', async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: 'Failed to retrieve system status', code: 'STATUS_ERROR' });
+  }
+});
+
+// ==========================================
+// 1.5. CHROMADB VECTOR SEARCH & AI ENDPOINTS
+// ==========================================
+app.get('/api/chroma/status', async (req, res, next) => {
+  try {
+    const status = await getChromaStatus();
+    res.json(status);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/api/chroma/query', searchLimiter, async (req, res, next) => {
+  try {
+    const { query, limit } = req.body;
+    const sanitizedQuery = sanitizeString(query, 120);
+    if (!sanitizedQuery) {
+      return res.status(400).json({ error: 'Truy vấn tìm kiếm ngữ nghĩa không được để trống' });
+    }
+    const results = await querySemanticWeather(sanitizedQuery, limit || 6);
+    res.json({ query: sanitizedQuery, count: results.length, results });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/api/chroma/sync', crudLimiter, async (req, res, next) => {
+  try {
+    const result = await syncAllSnapshotsToChroma();
+    res.json({ success: true, ...result });
+  } catch (err) {
+    next(err);
   }
 });
 
