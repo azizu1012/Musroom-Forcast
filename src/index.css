@@ -1,0 +1,674 @@
+:root {
+  --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Plus Jakarta Sans', 'Outfit', sans-serif;
+
+  /* Apple Frosted Glass Materials */
+  --glass-material: rgba(255, 255, 255, 0.08);
+  --glass-material-hover: rgba(255, 255, 255, 0.13);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-inner-border: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --glass-blur: blur(40px) saturate(190%);
+
+  /* Apple Palette & Typography */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.68);
+  --text-tertiary: rgba(255, 255, 255, 0.45);
+  
+  --accent-blue: #38bdf8;
+  --accent-yellow: #fbbf24;
+  --accent-orange: #fb923c;
+  --accent-red: #f87171;
+  --accent-green: #34d399;
+  --accent-purple: #c084fc;
+
+  --radius-widget: 22px;
+  --radius-pill: 9999px;
+  --shadow-apple: 0 12px 36px -8px rgba(0, 0, 0, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-system);
+  background: #030712;
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  line-height: 1.45;
+  user-select: none;
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-pill);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Canvas Atmospheric Background */
+.weather-canvas-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.weather-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* =========================================================================
+   APPLE WEATHER MASTER-DETAIL RESPONSIVE LAYOUT (iPad / macOS style)
+   ========================================================================= */
+.apple-app-shell {
+  position: relative;
+  z-index: 10;
+  max-width: 1440px;
+  margin: 0 auto;
+  height: 100vh;
+  padding: clamp(0.5rem, 1.2vw, 1rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: hidden;
+}
+
+/* Top Navigation Bar */
+.apple-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.25rem 0.5rem;
+  flex-shrink: 0;
+}
+
+.apple-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.apple-brand-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.05));
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+}
+
+.apple-brand-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.apple-btn-round {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apple-btn-round:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.apple-btn-pill {
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+}
+
+.apple-btn-pill:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Master Dual-Pane Body */
+.apple-dual-stage {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(320px, 370px) 1fr;
+  gap: clamp(0.85rem, 1.5vw, 1.5rem);
+  overflow: hidden;
+  height: calc(100% - 50px);
+}
+
+/* Left Pane: Saved Locations & Fuzzy Search (Apple Sidebar) */
+.apple-sidebar-pane {
+  background: var(--glass-material);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-widget);
+  box-shadow: var(--shadow-apple);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+.apple-sidebar-header {
+  padding: 1rem 1rem 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+
+.apple-search-box {
+  position: relative;
+  width: 100%;
+}
+
+.apple-search-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-pill);
+  padding: 0.5rem 0.85rem 0.5rem 2.2rem;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.88rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.apple-search-input:focus {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.apple-search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.apple-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.sidebar-scroll-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Right Pane: Active Weather Dashboard */
+.apple-main-pane {
+  overflow-y: auto;
+  padding-right: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.85rem, 1.2vw, 1.25rem);
+  height: 100%;
+}
+
+/* Responsive Collapse for Small Screens */
+@media (max-width: 1023px) {
+  .apple-app-shell {
+    height: auto;
+    overflow: visible;
+  }
+  .apple-dual-stage {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+  }
+  .apple-sidebar-pane {
+    height: 480px;
+    max-height: 70vh;
+  }
+  .apple-main-pane {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+/* Apple Glass Widget Base */
+.apple-widget {
+  background: var(--glass-material);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-apple);
+  border-radius: var(--radius-widget);
+  padding: clamp(1rem, 1.3vw, 1.25rem);
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.apple-widget:hover {
+  background: var(--glass-material-hover);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.widget-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+/* =========================================================================
+   APPLE WEATHER HERO SECTION
+   ========================================================================= */
+.apple-hero {
+  text-align: center;
+  padding: clamp(1.25rem, 2.5vw, 2.25rem) 1rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.apple-hero-city {
+  font-size: clamp(1.65rem, 3.5vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.apple-hero-province {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.apple-hero-temp {
+  font-size: clamp(3.75rem, 7.5vw, 5.75rem);
+  font-weight: 200;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  margin: 0.35rem 0 0.15rem 0;
+  color: #ffffff;
+}
+
+.apple-hero-condition {
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.apple-hero-range {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-top: 0.2rem;
+}
+
+/* =========================================================================
+   HOURLY FORECAST MODULE
+   ========================================================================= */
+.apple-hourly-list {
+  display: flex;
+  gap: 1.15rem;
+  overflow-x: auto;
+  padding: 0.35rem 0.2rem 0.6rem 0.2rem;
+  scroll-behavior: smooth;
+}
+
+.apple-hourly-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 54px;
+  flex-shrink: 0;
+}
+
+.apple-hourly-time {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.apple-hourly-temp {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.apple-hourly-pop {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent-blue);
+  min-height: 16px;
+}
+
+/* =========================================================================
+   16-DAY FORECAST WITH SIGNATURE APPLE TEMPERATURE SPECTRUM BAR
+   ========================================================================= */
+.apple-day-row {
+  display: grid;
+  grid-template-columns: 78px 34px 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.apple-day-row:last-child {
+  border-bottom: none;
+}
+
+.apple-day-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.apple-day-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.apple-temp-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.apple-temp-min {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  min-width: 28px;
+  text-align: right;
+  font-weight: 500;
+}
+
+.apple-temp-max {
+  font-size: 0.9rem;
+  color: #ffffff;
+  min-width: 28px;
+  text-align: left;
+  font-weight: 600;
+}
+
+/* The Apple Spectrum Bar */
+.apple-spectrum-track {
+  position: relative;
+  flex: 1;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.apple-spectrum-active {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, #38bdf8 0%, #34d399 40%, #fbbf24 75%, #f97316 100%);
+}
+
+.apple-spectrum-dot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+  border: 1.5px solid #0f172a;
+  z-index: 2;
+}
+
+.apple-day-expanded {
+  margin-top: 0.4rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+/* =========================================================================
+   APPLE WEATHER MODULAR GRID WIDGETS (2 Columns on Desktop)
+   ========================================================================= */
+.apple-widgets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(0.75rem, 1.2vw, 1.25rem);
+}
+
+@media (max-width: 640px) {
+  .apple-widgets-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.widget-main-value {
+  font-size: clamp(1.75rem, 2.4vw, 2.1rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin-bottom: 0.25rem;
+}
+
+.widget-subtitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 0.2rem;
+}
+
+.widget-footer-note {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+/* AQI Spectrum Bar */
+.aqi-bar {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, #10b981 0%, #fbbf24 35%, #f97316 65%, #ef4444 85%, #8b5cf6 100%);
+  margin: 0.65rem 0;
+  position: relative;
+}
+
+.aqi-pointer {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: #ffffff;
+  border: 2px solid #0f172a;
+  border-radius: 50%;
+}
+
+/* =========================================================================
+   SIDEBAR LOCATION CARDS (Apple Weather City List)
+   ========================================================================= */
+.apple-saved-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 0.75rem 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.apple-saved-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.apple-saved-card.active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+}
+
+.saved-card-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.saved-card-sub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* Modal Sheet */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.8);
+  backdrop-filter: blur(25px);
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-sheet {
+  background: #0d1527;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  max-width: 580px;
+  width: 100%;
+  padding: 1.5rem;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.form-input, .form-textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus, .form-textarea:focus {
+  border-color: var(--accent-blue);
+}
+
+.btn-apple-primary {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 0.55rem 1.2rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.btn-apple-primary:hover {
+  background: #1d4ed8;
+}
+
+.btn-apple-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-pill);
+  padding: 0.55rem 1.2rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+/* Toast */
+.apple-toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.apple-toast {
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 0.55rem 1.15rem;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  font-size: 0.82rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

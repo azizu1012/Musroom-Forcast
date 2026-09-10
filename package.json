@@ -1,0 +1,30 @@
+{
+  "name": "weather-pulse-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Premium dynamic weather forecasting application with 16-day Open-Meteo predictions, 3-year SQLite .db historical retention, CRUD, and isolated runtime",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n \"API,WEB\" -c \"blue,green\" \"node server/index.js\" \"vite --port 3000\"",
+    "start": "node server/index.js",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test test/api.test.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "fuse.js": "^7.5.0",
+    "helmet": "^8.0.0",
+    "lucide-react": "^0.475.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "vite": "^6.1.1"
+  }
+}
