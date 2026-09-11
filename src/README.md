@@ -32,7 +32,7 @@ src/
 │   ├── MushroomAgroMetrics.jsx # Hệ thống nông nghiệp vi khí hậu & 4 tầng độ ẩm đất trồng nấm
 │   ├── HourlySlider.jsx        # Thanh trượt 24 giờ thời tiết chi tiết
 │   ├── Forecast16Days.jsx      # Dự báo hàng ngày Apple (8 ngày mặc định, mở rộng 16 ngày)
-│   ├── LocationManager.jsx     # Quản lý 207+ địa điểm, tìm kiếm mờ Fuse.js & bản đồ OSM
+│   ├── LocationManager.jsx     # Quản lý địa điểm, tra cứu trực tiếp 34 tỉnh thành & 3.321 phường/xã (Live Autocomplete)
 │   ├── HistoricalComparator.jsx# So sánh khí hậu lịch sử 3 năm cùng kỳ
 │   ├── ChromaModal.jsx         # Tìm kiếm hình thái thời tiết bằng ChromaDB Vector AI
 │   └── SystemModal.jsx         # Dashboard trạng thái hệ thống, SQLite & dọn dẹp dữ liệu

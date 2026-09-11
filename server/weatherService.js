@@ -1,5 +1,6 @@
 import { db } from './db.js';
 import { syncToChroma } from './chromaService.js';
+import { searchWardsAndProvinces } from './vnAdminService.js';
 
 // In-memory cache for API responses (5 minutes TTL for forecast, 1 hour for geocoding)
 const cache = new Map();
@@ -75,7 +76,32 @@ export async function searchLocations(query) {
     });
   }
 
-  // 1. Primary: Nominatim OpenStreetMap for precise Vietnamese administrative wards (Phường / Xã)
+  // 1. Primary: Official Vietnam Administrative Engine (vn-province 34 Provinces & 3,321 Wards)
+  try {
+    const vnAdminResults = await searchWardsAndProvinces(rawQuery, 10);
+    if (Array.isArray(vnAdminResults) && vnAdminResults.length > 0) {
+      for (const item of vnAdminResults) {
+        addResult({
+          id: item.id,
+          name: item.name,
+          lat: item.latitude,
+          lon: item.longitude,
+          admin1: item.admin1,
+          region: item.region,
+          display_name: item.display_name
+        });
+      }
+      // If we found official administrative matches, cache and return immediately
+      if (results.length >= 5) {
+        setCached(cacheKey, results);
+        return results;
+      }
+    }
+  } catch (err) {
+    console.warn('[WEATHER SERVICE] VN Admin search error:', err.message);
+  }
+
+  // 2. Secondary: Nominatim OpenStreetMap for custom POIs or specific addresses
   try {
     const osmUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(rawQuery)}&countrycodes=vn&format=json&addressdetails=1&limit=6`;
     const osmRes = await fetch(osmUrl, {

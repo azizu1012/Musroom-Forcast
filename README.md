@@ -15,7 +15,7 @@
 ![Security](https://img.shields.io/badge/Security-Helmet_Hardened-10B981?style=for-the-badge&logo=shield&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge&logo=open-source-initiative&logoColor=white)
 ![Author](https://img.shields.io/badge/Author-azizu1012-8B5CF6?style=for-the-badge&logo=github&logoColor=white)
-![Vietnam Coverage](https://img.shields.io/badge/Vietnam-63_Provinces_%26_207%2B_Wards-EF4444?style=for-the-badge&logo=googlemaps&logoColor=white)
+![Vietnam Coverage](https://img.shields.io/badge/Vietnam_Map-34_Provinces_%26_3%2C321_Wards-EF4444?style=for-the-badge&logo=googlemaps&logoColor=white)
 ![API Service](https://img.shields.io/badge/Architecture-Decoupled_API_Module-06B6D4?style=for-the-badge&logo=fastapi&logoColor=white)
 ![Client GPS](https://img.shields.io/badge/Geolocation-Auto_Client_GPS-10B981?style=for-the-badge&logo=googlemaps&logoColor=white)
 
@@ -79,23 +79,27 @@ Dự án áp dụng ngôn ngữ thiết kế **Apple Weather Glassmorphism** (ma
   11. *Tầm nhìn xa*: Khoảng cách quang đãng tính bằng $km$.
   12. *Áp suất khí quyển*: Áp suất barometric bề mặt ($hPa$) và xu hướng khí quyển.
 
-### 5. 🗺️ Mạng Lưới 207+ Phường Chuẩn Xác & Toàn Bộ 63 Tỉnh Thành Việt Nam
-- **Cập nhật danh pháp hành chính chuẩn xác nhất**:
-  - *TP. Hồ Chí Minh*: Đầy đủ 100% **toàn bộ 11 phường của Quận 12** (*Phường Thới An, Phường Hiệp Thành, Phường Tân Chánh Hiệp, Phường Thạnh Xuân, Phường Thạnh Lộc, Phường An Phú Đông, Phường Tân Thới Hiệp, Phường Đông Hưng Thuận, Phường Tân Hưng Thuận, Phường Tân Thới Nhất, Phường Trung Mỹ Tây*), cùng các phường Quận 1, Gò Vấp, Tân Phú, Bình Tân, và trung tâm TP. Thủ Đức.
-  - *Thủ đô Hà Nội*: Toàn bộ các phường trọng điểm (Tràng Tiền, Hàng Bạc, Hàng Đào, Quán Thánh, Điện Biên, Liễu Giai, Dịch Vọng Hậu, Mỹ Đình, Mễ Trì, Bách Khoa, v.v.).
-  - *Toàn bộ 63 tỉnh thành*: Phủ sóng 100% lãnh thổ Việt Nam với tọa độ WGS84 chính xác.
-- **Bản Đồ Mở Rộng Việt Nam (Dynamic Geocoding)**: Tích hợp công cụ OpenStreetMap Nominatim (`countrycodes=vn`), cho phép tra cứu và lưu bất kỳ phường/xã/thị trấn đặc thù nào trên cả nước chỉ với 1 cú click.
+### 5. 🗺️ Bản Đồ Hành Chính Chuẩn Mới Nhất (34 Tỉnh Thành & 3.321 Phường/Xã)
+- **Tuân thủ tuyệt đối Nghị quyết số 202/2025/QH15 của Quốc hội**:
+  - Gồm **6 Thành phố trực thuộc Trung ương** (Hà Nội, TP. Hồ Chí Minh [hợp nhất Bình Dương & Bà Rịa - Vũng Tàu], Hải Phòng, Đà Nẵng, Huế, Cần Thơ) và **28 Tỉnh**.
+  - Tích hợp trọn vẹn **3.321 Phường và Xã** trực thuộc toàn quốc thông qua thư viện chuẩn hóa `vn-province`.
+  - Mọi phường trọng điểm như **Phường Thới An**, **Phường Hiệp Thành**, **Phường Tân Chánh Hiệp**, **Phường Bến Thành**, **Phường Ba Đình**, **Phường Sa Pa**, **Phường Ninh Kiều**... đều được định danh WGS84 chính xác.
+- **Tìm kiếm trực tiếp tức thời (Real-time Live Autocomplete, <20ms)**:
+  - Người dùng gõ bất kỳ tên phường, xã, hay tỉnh thành nào vào ô tìm kiếm: kết quả chính thức từ bản đồ hành chính mới nhất sẽ **tự động xuất hiện ngay lập tức** trong dropdown.
+  - **Triệt tiêu hoàn toàn nút bấm tìm kiếm ngoài**: Không cần bấm bất kỳ nút "Tìm trực tuyến bên ngoài" nào.
+  - 1-click chọn là hệ thống tức tốc tải dữ liệu thời tiết và lưu vào cơ sở dữ liệu SQLite.
 
 ### 6. 🔍 Thuật Toán Tìm Kiếm Mờ Tiếng Việt (Fuse.js Diacritic-Folding)
 - Tự động nhận diện từ khóa viết tắt, gõ sai hoặc không dấu:
-  - `sapa` ➔ **Sa Pa (Lào Cai)**
+  - `thoi an` ➔ **Phường Thới An (TP.HCM)**
+  - `sapa` ➔ **Phường Sa Pa (Lào Cai)**
   - `da kao` ➔ **Phường Đa Kao (TP.HCM)**
-  - `hn` ➔ **Thủ đô Hà Nội**
+  - `hn` ➔ **Thành phố Hà Nội**
   - `my khe` ➔ **Phường An Hải Bắc (Đà Nẵng)**
   - `dalat` ➔ **Phường 1 (Đà Lạt)**
-  - `vug tau` ➔ **Phường 1 / Phường 2 (Bà Rịa - Vũng Tàu)**
+  - `vug tau` ➔ **Phường Vũng Tàu (TP.HCM)**
 
-### 5. 🛡️ Cơ Sở Dữ Liệu SQLite & Chính Sách Lưu Trữ 3 Năm (ACID Retention)
+### 7. 🛡️ Cơ Sở Dữ Liệu SQLite & Chính Sách Lưu Trữ 3 Năm (ACID Retention)
 - Sử dụng `node:sqlite` (DatabaseSync) với chế độ `PRAGMA journal_mode = WAL`.
 - Động cơ dọn dẹp dữ liệu tự động quét định kỳ: Chỉ lưu trữ lịch sử khí hậu tối đa 3 năm (`datetime('now', '-3 years')`), tối ưu hóa dung lượng lưu trữ cục bộ.
 - Bảo mật chuẩn công nghiệp: Helmet headers, rate limiting (120 req/min), chống XSS/SQL Injection, ẩn thông tin máy chủ nhạy cảm.

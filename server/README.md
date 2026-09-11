@@ -8,7 +8,8 @@
 
 ```
 server/
-├── db.js              # Khởi tạo SQLite native (.db), schema định nghĩa bảng, seed dữ liệu TP.HCM & Miền Nam
+├── db.js              # Khởi tạo SQLite native (.db), schema định nghĩa bảng, seed 34 Tỉnh/Thành & các phường trọng điểm
+├── vnAdminService.js  # Module quản lý 34 Tỉnh/Thành & 3.321 Phường/Xã chuẩn Nghị quyết 202/2025/QH15
 ├── retention.js       # Engine tự động dọn dẹp dữ liệu lịch sử quá 3 năm (Purge Cron)
 ├── security.js        # Cấu hình bảo mật Helmet, Rate Limiters, Input Sanitization, Masked Error Handler
 ├── weatherService.js  # Tích hợp & proxy Open-Meteo API (Forecast 16d, Geocoding, AQI, Archive 3 năm)
@@ -23,21 +24,21 @@ server/
 Hệ thống sử dụng module `node:sqlite` (`DatabaseSync`) tích hợp sẵn trong Node.js, không phụ thuộc vào công cụ biên dịch C++ (node-gyp):
 
 ### 2.1. Bảng `locations`
-Lưu trữ danh sách 207+ địa điểm theo dõi (CRUD) chuẩn đơn vị hành chính Việt Nam mới nhất:
+Lưu trữ danh sách địa điểm theo dõi (CRUD) chuẩn đơn vị hành chính Việt Nam mới nhất:
 - `id`: Khóa chính tự tăng (`INTEGER PRIMARY KEY AUTOINCREMENT`)
-- `name`: Tên Phường/Xã/Thành phố chuẩn (`TEXT NOT NULL`), ví dụ: **Phường Thới An**, **Phường Hiệp Thành**, **Phường Bến Nghé**, v.v.
+- `name`: Tên Phường/Xã/Thành phố chuẩn (`TEXT NOT NULL`), ví dụ: **Phường Thới An**, **Phường Hiệp Thành**, **Phường Bến Thành**, v.v.
 - `latitude`, `longitude`: Tọa độ địa lý chuẩn WGS84 (`REAL NOT NULL`)
-- `admin1`: Tỉnh/thành trực thuộc (`TEXT`), ví dụ: *TP. Hồ Chí Minh*, *TP. Thủ Đức*, *Hà Nội*
+- `admin1`: Tỉnh/thành trực thuộc (`TEXT`), ví dụ: *Thành phố Hồ Chí Minh*, *Thành phố Hà Nội*
 - `region`: Khu vực phân vùng (`TP.HCM`, `Hà Nội`, `Miền Bắc`, `Miền Trung`, `Miền Nam`)
 - `custom_label`: Nhãn do người dùng hoặc hạt giống định danh (`TEXT`)
 - `notes`: Ghi chú cá nhân (`TEXT`)
 - `alert_rain_threshold`: Ngưỡng cảnh báo mưa (`INTEGER DEFAULT 60`)
 - `is_favorite`: Cờ địa điểm ưu tiên (`INTEGER DEFAULT 0`)
 
-> **Chi tiết mạng lưới hành chính hạt giống (Seed Locations):**
-> - **Khu vực TP. Hồ Chí Minh**: Phủ sóng toàn bộ 11 phường của Quận 12 (*Thới An, Hiệp Thành, Tân Chánh Hiệp, Thạnh Xuân, Thạnh Lộc, An Phú Đông, Tân Thới Hiệp, Đông Hưng Thuận, Tân Hưng Thuận, Tân Thới Nhất, Trung Mỹ Tây*), 10 phường Quận 1, 8 phường Gò Vấp, 6 phường Tân Phú & Bình Tân, cùng các phường trung tâm TP. Thủ Đức, Bình Thạnh, Phú Nhuận, Quận 7.
-> - **Khu vực Hà Nội**: Toàn bộ các phường trọng điểm (Tràng Tiền, Hàng Bạc, Quán Thánh, Liễu Giai, Dịch Vọng Hậu, Mễ Trì, Bách Khoa, v.v.).
-> - **63 Tỉnh Thành**: Đầy đủ 100% tọa độ chuẩn WGS84 của tất cả các tỉnh thành và trung tâm kinh tế - du lịch Việt Nam.
+> **Bản Đồ Hành Chính Mới Nhất (Nghị quyết 202/2025/QH15 & vn-province):**
+> - **34 Tỉnh & Thành phố trực thuộc Trung ương**: 6 Thành phố trực thuộc Trung ương (*Hà Nội, TP.HCM, Hải Phòng, Đà Nẵng, Huế, Cần Thơ*) và 28 Tỉnh.
+> - **3.321 Phường & Xã**: Tích hợp toàn diện vào động cơ tìm kiếm tức thời `vnAdminService.js` (<20ms).
+> - **Khu vực TP. Hồ Chí Minh**: Phủ sóng đầy đủ toàn bộ 11 phường của Quận 12 (*Thới An, Hiệp Thành, Tân Chánh Hiệp, Thạnh Xuân, Thạnh Lộc, An Phú Đông, Tân Thới Hiệp, Đông Hưng Thuận, Tân Hưng Thuận, Tân Thới Nhất, Trung Mỹ Tây*), các phường trung tâm (Bến Thành, Đa Kao, Tân Định, Võ Thị Sáu), và các khu vực sáp nhập (Thủ Dầu Một, Bến Cát, Vũng Tàu).
 
 ### 2.2. Bảng `weather_snapshots`
 Lưu trữ lịch sử thời tiết phục vụ phân tích xu hướng và đối chiếu 3 năm:

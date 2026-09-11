@@ -27,17 +27,12 @@ export default function LocationManager({
   const [editingLoc, setEditingLoc] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Online Geocoding Search state (for finding any ward/commune in Vietnam)
-  const [isSearchingOnline, setIsSearchingOnline] = useState(false);
-  const [onlineResults, setOnlineResults] = useState([]);
-  const [hasSearchedOnline, setHasSearchedOnline] = useState(false);
-
   // New location form state
   const [newLocForm, setNewLocForm] = useState({
     name: '',
     latitude: '',
     longitude: '',
-    admin1: 'TP. Hồ Chí Minh',
+    admin1: 'Thành phố Hồ Chí Minh',
     custom_label: 'Yêu thích',
     notes: ''
   });
@@ -69,12 +64,10 @@ export default function LocationManager({
 
   // 2. Compute filtered & fuzzy-searched locations
   const displayedLocations = useMemo(() => {
-    // If search term is present, perform fuzzy search
     let list = searchTerm.trim().length > 0 
       ? fuzzyEngine.search(searchTerm) 
       : locations;
 
-    // Apply region tabs
     if (filterRegion === 'hcm') {
       list = list.filter((loc) => loc.region === 'TP.HCM' || loc.admin1?.includes('Hồ Chí Minh') || loc.admin1?.includes('Thủ Đức'));
     } else if (filterRegion === 'hanoi') {
@@ -90,36 +83,58 @@ export default function LocationManager({
     return list;
   }, [searchTerm, filterRegion, fuzzyEngine, locations]);
 
-  // Handle Online Search for any ward/commune in Vietnam
-  const handleSearchOnline = async () => {
-    if (!searchTerm || searchTerm.trim().length < 2) return;
-    setIsSearchingOnline(true);
-    setHasSearchedOnline(true);
-    try {
-      const data = await searchLocationsApi(searchTerm);
-      setOnlineResults(data || []);
-    } catch (err) {
-      console.error('[ONLINE SEARCH]', err);
-      setOnlineResults([]);
-    } finally {
-      setIsSearchingOnline(false);
-    }
-  };
+  // Live Administrative Divisions Search state (34 Provinces & 3,321 Wards)
+  const [isSearchingAdmin, setIsSearchingAdmin] = useState(false);
+  const [adminResults, setAdminResults] = useState([]);
 
-  const handleSelectOnlineResult = async (item) => {
-    await onAddLocation({
-      name: item.name,
-      latitude: item.latitude,
-      longitude: item.longitude,
-      country: 'Vietnam',
-      admin1: item.admin1 || 'Việt Nam',
-      region: item.region || 'Miền Nam',
-      custom_label: 'Bản đồ VN',
-      notes: item.display_name || ''
-    });
-    setOnlineResults([]);
-    setHasSearchedOnline(false);
+  // Debounced search effect querying official Vietnam administrative units
+  React.useEffect(() => {
+    if (!searchTerm || searchTerm.trim().length < 2) {
+      setAdminResults([]);
+      setIsSearchingAdmin(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearchingAdmin(true);
+      try {
+        const results = await searchLocationsApi(searchTerm.trim());
+        setAdminResults(results || []);
+      } catch (err) {
+        console.error('[ADMIN SEARCH ERROR]', err);
+        setAdminResults([]);
+      } finally {
+        setIsSearchingAdmin(false);
+      }
+    }, 180);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Handle selecting an official administrative unit (Ward/Province)
+  const handleSelectAdminResult = async (item) => {
+    const existing = locations.find(
+      (l) => l.name.toLowerCase() === item.name.toLowerCase() ||
+             (Math.abs(l.latitude - item.latitude) < 0.01 && Math.abs(l.longitude - item.longitude) < 0.01)
+    );
+
+    if (existing) {
+      onSelectLocation(existing);
+    } else {
+      await onAddLocation({
+        name: item.name,
+        latitude: item.latitude,
+        longitude: item.longitude,
+        country: 'Vietnam',
+        admin1: item.admin1 || 'Việt Nam',
+        region: item.region || 'Miền Nam',
+        custom_label: item.division_type ? item.division_type.toUpperCase() : 'BẢN ĐỒ MỚI',
+        notes: item.display_name || ''
+      });
+    }
+
     setSearchTerm('');
+    setAdminResults([]);
   };
 
   const handleOpenEdit = (loc, e) => {
@@ -185,26 +200,21 @@ export default function LocationManager({
           </button>
         </div>
 
-        {/* Typo-tolerant Fuzzy Search Box */}
+        {/* Instant Vietnam Administrative Units & Saved Locations Search Box */}
         <div className="apple-search-box">
           <Search size={14} className="apple-search-icon" />
           <input
             type="text"
             className="apple-search-input"
-            placeholder="Tìm phường, quận, tỉnh thành (nhận diện gõ sai)..."
+            placeholder="Tìm nhanh 34 tỉnh thành & 3.321 phường/xã..."
             value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setHasSearchedOnline(false);
-              setOnlineResults([]);
-            }}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
           {searchTerm && (
             <button
               onClick={() => {
                 setSearchTerm('');
-                setHasSearchedOnline(false);
-                setOnlineResults([]);
+                setAdminResults([]);
               }}
               style={{
                 position: 'absolute',
@@ -252,78 +262,63 @@ export default function LocationManager({
 
       {/* Scrollable Location Cards List */}
       <div className="sidebar-scroll-list">
-        {/* Dynamic Online Geocoding Search option for any ward/commune in Vietnam */}
+        {/* Official Vietnam Administrative Divisions Live Autocomplete (34 Provinces & 3,321 Wards) */}
         {searchTerm.trim().length >= 2 && (
-          <div style={{
-            padding: '0.5rem 0.65rem',
-            background: 'rgba(56, 189, 248, 0.08)',
-            borderRadius: '10px',
-            border: '1px solid rgba(56, 189, 248, 0.22)',
-            marginBottom: '0.65rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.4rem'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.76rem', color: 'var(--accent-blue)', fontWeight: 600 }}>
+          <div className="vn-admin-search-results">
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0.45rem 0.65rem',
+              borderBottom: '1px solid rgba(56, 189, 248, 0.2)',
+              fontSize: '0.72rem',
+              fontWeight: 600,
+              color: '#38bdf8'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <Globe size={13} />
-                <span>Bản Đồ Mở Rộng Việt Nam</span>
+                <span>BẢN ĐỒ HÀNH CHÍNH CHÍNH THỨC ({adminResults.length})</span>
               </div>
-              <button
-                className="apple-btn-pill"
-                style={{
-                  fontSize: '0.7rem',
-                  padding: '0.22rem 0.55rem',
-                  background: 'var(--accent-blue)',
-                  color: '#fff',
-                  border: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.3rem',
-                  cursor: 'pointer'
-                }}
-                onClick={handleSearchOnline}
-                disabled={isSearchingOnline}
-              >
-                {isSearchingOnline ? <Loader2 size={11} className="apple-spinner" /> : <Search size={11} />}
-                <span>Tìm trực tuyến</span>
-              </button>
+              {isSearchingAdmin && <Loader2 size={12} className="apple-spinner" />}
             </div>
 
-            {hasSearchedOnline && (
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
-                {isSearchingOnline
-                  ? 'Đang tra cứu tọa độ toàn quốc...'
-                  : onlineResults.length === 0
-                  ? `Không tìm thấy thêm xã/phường cho "${searchTerm}"`
-                  : `Tìm thấy ${onlineResults.length} địa điểm trên bản đồ Việt Nam:`}
+            {isSearchingAdmin && adminResults.length === 0 && (
+              <div style={{ padding: '0.6rem', fontSize: '0.74rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                Đang tra cứu cơ sở dữ liệu hành chính 34 tỉnh thành...
               </div>
             )}
 
-            {onlineResults.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', maxHeight: '140px', overflowY: 'auto' }}>
-                {onlineResults.map((item, idx) => (
+            {!isSearchingAdmin && adminResults.length === 0 && (
+              <div style={{ padding: '0.6rem', fontSize: '0.74rem', color: 'var(--text-tertiary)', textAlign: 'center' }}>
+                Không tìm thấy phường/xã hoặc tỉnh thành cho "{searchTerm}"
+              </div>
+            )}
+
+            {adminResults.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.35rem', maxHeight: '180px', overflowY: 'auto' }}>
+                {adminResults.map((item, idx) => (
                   <div
                     key={idx}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '0.35rem 0.5rem',
-                      background: 'rgba(255, 255, 255, 0.08)',
-                      borderRadius: '6px',
-                      fontSize: '0.74rem',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => handleSelectOnlineResult(item)}
+                    className="vn-search-item"
+                    onClick={() => handleSelectAdminResult(item)}
+                    title={`Xem thời tiết tại ${item.name}`}
                   >
-                    <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '75%' }}>
-                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.name}</span>
-                      <span style={{ fontSize: '0.66rem', color: 'var(--text-tertiary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {item.admin1 || item.display_name}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0 }}>
+                      <span className="vn-select-badge">
+                        {item.division_type ? item.division_type.toUpperCase() : (item.name.startsWith('Phường') ? 'PHƯỜNG' : (item.name.startsWith('Xã') ? 'XÃ' : 'TỈNH/TP'))}
                       </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                        <span style={{ fontWeight: 600, fontSize: '0.8rem', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {item.name}
+                        </span>
+                        <span style={{ fontSize: '0.66rem', color: 'rgba(255, 255, 255, 0.65)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {item.admin1 || item.display_name}
+                        </span>
+                      </div>
                     </div>
-                    <span style={{ fontSize: '0.68rem', color: 'var(--accent-blue)', fontWeight: 600 }}>+ Lưu</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--accent-blue)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                      + Xem & Lưu
+                    </span>
                   </div>
                 ))}
               </div>
@@ -331,12 +326,16 @@ export default function LocationManager({
           </div>
         )}
 
-        {displayedLocations.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>
-            Không tìm thấy địa điểm trong danh mục có sẵn với "{searchTerm}".
-            <div style={{ marginTop: '0.4rem', fontSize: '0.75rem' }}>
-              Hãy bấm <strong>Tìm trực tuyến</strong> ở trên để tra cứu tức thì trên toàn bộ bản đồ Việt Nam!
-            </div>
+        {/* Header for Saved Locations when searching */}
+        {searchTerm.trim().length >= 2 && displayedLocations.length > 0 && (
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', margin: '0.4rem 0 0.3rem 0.2rem', fontWeight: 600 }}>
+            ĐỊA ĐIỂM ĐÃ LƯU KHỚP TÌM KIẾM ({displayedLocations.length})
+          </div>
+        )}
+
+        {displayedLocations.length === 0 && adminResults.length === 0 && !isSearchingAdmin && searchTerm.trim().length >= 2 ? (
+          <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-tertiary)', fontSize: '0.82rem' }}>
+            Không tìm thấy địa điểm hoặc đơn vị hành chính với "{searchTerm}".
           </div>
         ) : (
           displayedLocations.map((loc) => {
