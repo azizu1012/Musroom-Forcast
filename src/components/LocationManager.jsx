@@ -12,6 +12,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { createFuzzySearchEngine, removeVietnameseTones } from '../utils/searchEngine';
+import { searchLocationsApi } from '../services/weatherApi';
 
 export default function LocationManager({
   locations,
@@ -95,10 +96,8 @@ export default function LocationManager({
     setIsSearchingOnline(true);
     setHasSearchedOnline(true);
     try {
-      const res = await fetch(`/api/weather/search?q=${encodeURIComponent(searchTerm.trim())}`);
-      if (!res.ok) throw new Error('Tìm kiếm trực tuyến thất bại');
-      const data = await res.json();
-      setOnlineResults(data);
+      const data = await searchLocationsApi(searchTerm);
+      setOnlineResults(data || []);
     } catch (err) {
       console.error('[ONLINE SEARCH]', err);
       setOnlineResults([]);

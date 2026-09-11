@@ -8,6 +8,7 @@ import {
   CheckCircle2, 
   Sparkles
 } from 'lucide-react';
+import { fetchSystemStatus, triggerAdminCleanup } from '../services/weatherApi';
 
 export default function SystemModal({ isOpen, onClose, onShowToast }) {
   const [status, setStatus] = useState(null);
@@ -17,11 +18,8 @@ export default function SystemModal({ isOpen, onClose, onShowToast }) {
   const fetchStatus = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/system/status');
-      if (res.ok) {
-        const json = await res.json();
-        setStatus(json);
-      }
+      const json = await fetchSystemStatus();
+      setStatus(json);
     } catch (err) {
       console.error('System status error:', err);
     } finally {
@@ -36,8 +34,7 @@ export default function SystemModal({ isOpen, onClose, onShowToast }) {
   const handleManualPurge = async () => {
     setPurging(true);
     try {
-      const res = await fetch('/api/admin/cleanup', { method: 'POST' });
-      const data = await res.json();
+      const data = await triggerAdminCleanup();
       if (data.success) {
         onShowToast(`Đã dọn dẹp: Xóa ${data.deletedCount} bản ghi quá 3 năm.`);
         fetchStatus();

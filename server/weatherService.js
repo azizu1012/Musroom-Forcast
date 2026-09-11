@@ -341,14 +341,14 @@ function saveSnapshotToDb(snapshot) {
         WHERE id = ?
       `);
       updateStmt.run(
-        snapshot.temperature,
-        snapshot.tempMax,
-        snapshot.tempMin,
-        snapshot.weatherCode,
-        snapshot.precipitationProbability,
-        snapshot.windSpeed,
-        snapshot.uvIndex,
-        snapshot.humidity,
+        snapshot.temperature ?? null,
+        snapshot.tempMax ?? null,
+        snapshot.tempMin ?? null,
+        snapshot.weatherCode ?? 0,
+        snapshot.precipitationProbability ?? 0,
+        snapshot.windSpeed ?? null,
+        snapshot.uvIndex ?? 0,
+        snapshot.humidity ?? null,
         existing.id
       );
     } else {
@@ -359,20 +359,20 @@ function saveSnapshotToDb(snapshot) {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       const res = insertStmt.run(
-        validLocationId,
-        snapshot.cityName,
-        snapshot.latitude,
-        snapshot.longitude,
-        snapshot.date,
-        snapshot.temperature,
-        snapshot.tempMax,
-        snapshot.tempMin,
-        snapshot.weatherCode,
-        snapshot.precipitationProbability,
-        snapshot.precipitationSum,
-        snapshot.windSpeed,
-        snapshot.uvIndex,
-        snapshot.humidity
+        validLocationId ?? null,
+        snapshot.cityName || 'Unknown',
+        snapshot.latitude ?? 0,
+        snapshot.longitude ?? 0,
+        snapshot.date || new Date().toISOString().split('T')[0],
+        snapshot.temperature ?? null,
+        snapshot.tempMax ?? null,
+        snapshot.tempMin ?? null,
+        snapshot.weatherCode ?? 0,
+        snapshot.precipitationProbability ?? 0,
+        snapshot.precipitationSum ?? 0,
+        snapshot.windSpeed ?? null,
+        snapshot.uvIndex ?? 0,
+        snapshot.humidity ?? null
       );
 
       // Async sync to Chroma DB vector bridge

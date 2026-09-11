@@ -15,7 +15,9 @@
 ![Security](https://img.shields.io/badge/Security-Helmet_Hardened-10B981?style=for-the-badge&logo=shield&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge&logo=open-source-initiative&logoColor=white)
 ![Author](https://img.shields.io/badge/Author-azizu1012-8B5CF6?style=for-the-badge&logo=github&logoColor=white)
-![Vietnam Coverage](https://img.shields.io/badge/Vietnam-63_Provinces_%26_180%2B_Wards-EF4444?style=for-the-badge&logo=googlemaps&logoColor=white)
+![Vietnam Coverage](https://img.shields.io/badge/Vietnam-63_Provinces_%26_207%2B_Wards-EF4444?style=for-the-badge&logo=googlemaps&logoColor=white)
+![API Service](https://img.shields.io/badge/Architecture-Decoupled_API_Module-06B6D4?style=for-the-badge&logo=fastapi&logoColor=white)
+![Client GPS](https://img.shields.io/badge/Geolocation-Auto_Client_GPS-10B981?style=for-the-badge&logo=googlemaps&logoColor=white)
 
 </div>
 
@@ -23,15 +25,33 @@
 
 ## 🌟 Giới Thiệu Dự Án (Overview)
 
-**Mushroom Forecast** là nền tảng dự báo thời tiết và phân tích vi khí hậu thế hệ mới, được thiết kế chuyên biệt cho việc theo dõi thời tiết thực tế và các chỉ số vi khí hậu quan trọng (độ ẩm cao, sương mù, điểm sương, áp suất khí quyển, lượng mưa tích lũy) phục vụ đời sống và nông nghiệp công nghệ cao (đặc biệt là mô hình nuôi trồng nấm).
+**Mushroom Forecast** là nền tảng dự báo thời tiết và phân tích vi khí hậu thế hệ mới, được thiết kế chuyên biệt cho việc theo dõi thời tiết thực tế và các chỉ số vi khí hậu quan trọng (độ ẩm cao, sương mù, điểm sương, áp suất khí quyển, lượng mưa tích lũy, 4 tầng độ ẩm đất, áp suất thiếu hụt VPD) phục vụ đời sống và nông nghiệp công nghệ cao (đặc biệt là mô hình nuôi trồng nấm).
 
-Dự án áp dụng ngôn ngữ thiết kế **Apple Weather Glassmorphism** (macOS & iPadOS), tích hợp động cơ **ChromaDB Vector AI** cho phép tìm kiếm thời tiết bằng ngôn ngữ tự nhiên, hệ thống cơ sở dữ liệu **SQLite ACID native WAL** với cơ chế tự động dọn dẹp lưu trữ 3 năm, và thuật toán tìm kiếm mờ dung sai lỗi chính tả (Typo-Tolerant Fuzzy Search).
+Dự án áp dụng ngôn ngữ thiết kế **Apple Weather Glassmorphism** (macOS & iPadOS), tích hợp động cơ **ChromaDB Vector AI** cho phép tìm kiếm thời tiết bằng ngôn ngữ tự nhiên, hệ thống cơ sở dữ liệu **SQLite ACID native WAL** với cơ chế tự động dọn dẹp lưu trữ 3 năm, kiến trúc **Module API độc lập Single Source of Truth**, và cơ chế **Tự động định vị GPS thiết bị Client**.
 
 ---
 
 ## 🚀 Tính Năng Cốt Lõi (Key Highlights)
 
-### 1. 🧠 ChromaDB Vector AI & Semantic Weather Search
+### 1. 🛰️ Tự Động Định Vị GPS Client & Tách Module API Độc Lập
+- **Không hardcode vị trí mặc định**: Khi mở ứng dụng trên bất kỳ trình duyệt nào, hệ thống tự động yêu cầu quyền Geolocation, định vị tọa độ thực tế của thiết bị client, và thực hiện Reverse Geocoding qua OpenStreetMap Nominatim để hiển thị đúng tên Phường/Xã/Quận và thời tiết thực tại nơi người dùng đang đứng.
+- **Nút Định Vị GPS (1-Click Re-locate)**: Cho phép người dùng bấm nút `📍 Vị Trí Của Bạn` trên thanh điều hướng để quét lại tọa độ bất kỳ lúc nào.
+- **Module Quản Lý API Độc Lập (`src/services/weatherApi.js`)**:
+  - Toàn bộ các tương tác mạng (CRUD địa điểm, định vị GPS, tìm kiếm mờ, dự báo thời tiết, ChromaDB, và tính toán vi khí hậu trồng nấm) được tập trung 100% trong module `weatherApi.js`.
+  - Nghiêm cấm viết lệnh `fetch()` phân tán trong các React Component, giúp dễ dàng kiểm soát lỗi, quản lý phụ thuộc (dependency) và nâng cấp API trong tương lai.
+  - Tích hợp cơ chế **Dual-Engine Auto-Fallback**: Nếu serverless proxy gặp cold-start, hệ thống tự động chuyển sang direct client engine trong 0 giây, triệt tiêu hoàn toàn tình trạng báo lỗi kết nối.
+
+### 2. 🍄 Hệ Thống Nông Nghiệp Vi Khí Hậu & 4 Tầng Độ Ẩm Đất Trồng Nấm
+- **4 Tầng độ ẩm đất chuyên sâu**: Đo lường tầng mặt ($0-1cm$), tầng mầm rễ ($1-3cm$), tầng phôi sợi ($3-9cm$) và tầng dinh dưỡng ($9-27cm$).
+- **Áp Suất Hơi Thiếu Hụt (Vapor Pressure Deficit - VPD)**: Đo lường độ bốc hơi nước của quả thể nấm, cảnh báo chính xác khi không khí quá khô ($VPD > 1.0\text{ kPa}$) hoặc ẩm bão hòa có nguy cơ đọng sương thối mũ ($VPD < 0.3\text{ kPa}$).
+- **Đánh giá tự động 5 giống nấm kinh tế tại Việt Nam**:
+  - 🌾 *Nấm Rơm* ($30-35^\circ C$, ẩm độ $80-90\%$)
+  - 🦪 *Nấm Bào Ngư / Nấm Sò* ($22-28^\circ C$, ẩm độ $85-90\%$)
+  - 🐜 *Nấm Mối / Nấm Mối Đen* ($25-30^\circ C$, ẩm tầng đất sâu $35-45\%$)
+  - 🪵 *Nấm Linh Chi* ($22-28^\circ C$, ẩm độ $80-85\%$)
+  - 🍄 *Nấm Mèo / Mộc Nhĩ* ($25-32^\circ C$, ẩm độ $80-90\%$)
+
+### 3. 🧠 ChromaDB Vector AI & Semantic Weather Search
 - **Truy vấn ngôn ngữ tự nhiên**: Cho phép tra cứu các hình thái khí hậu thông minh mà không cần gõ từ khóa chính xác:
   - *"Độ ẩm rất cao thích hợp cho nuôi trồng nấm"*
   - *"Dông bão gió giật mạnh và sấm sét"*
@@ -42,28 +62,31 @@ Dự án áp dụng ngôn ngữ thiết kế **Apple Weather Glassmorphism** (ma
   - Tự động chuyển đổi sang **Embedded Vector Cosine Similarity Engine** nội bộ nếu Chroma daemon offline, đảm bảo ứng dụng luôn chạy 100% độc lập không gián đoạn.
 - **Đồng bộ hóa tức thì**: Endpoint `POST /api/chroma/sync` tự động vectorize toàn bộ dữ liệu lịch sử và chỉ số vi khí hậu.
 
-### 2. 🍏 Giao Diện Apple Weather (iOS / macOS Glassmorphism)
+### 4. 🍏 Giao Diện Apple Weather (iOS / macOS Glassmorphism)
 - **Thiết kế Master-Detail 2 cột**: Tự động scale theo tỷ lệ màn hình (`clamp()`), cột bên trái quản lý danh sách địa phương, cột bên phải là dashboard thời tiết với kính mờ `backdrop-filter: blur(40px)`.
 - **Dự Báo Hàng Ngày (Apple Daily Forecast)**: Mặc định hiển thị gọn gàng **8 ngày** (Hôm nay kèm badge `Hiện tại` + 7 ngày tiếp theo), tích hợp nút bấm mở rộng toàn chuỗi **16 ngày** kèm thanh phổ nhiệt độ Apple Spectrum Bar.
-- **8 Modular Widgets chuyên sâu**:
+- **12 Modular Widgets chuyên sâu**:
   1. *Chất lượng không khí (AQI)*: Phân tích nồng độ $PM2.5$, $PM10$, $O_3$, $NO_2$.
   2. *Chỉ số UV & Đỉnh nắng*: Chỉ số hiện tại và đỉnh bức xạ trong ngày (UV Max).
   3. *Mặt trời lặn & Bình minh*: Giờ lặn, chu kỳ sáng và giờ mọc hôm sau.
   4. *Gió & Gió giật*: Tốc độ trung bình, gió giật cực đại (Wind Gusts) và la bàn số $360^\circ$.
   5. *Lượng mưa 24 giờ*: Lượng mưa tích lũy ($mm$), xác suất mưa và số giờ mưa.
   6. *Cảm giác như & Điểm sương*: Nhiệt độ cảm nhận kết hợp **Điểm sương (Dew Point)**.
-  7. *Tầm nhìn xa*: Khoảng cách quang đãng tính bằng $km$.
-  8. *Áp suất khí quyển*: Áp suất barometric bề mặt ($hPa$) và xu hướng khí quyển.
+  7. *Độ ẩm tương đối*: Khuyến nghị độ ẩm cho quả thể nấm.
+  8. *Độ ẩm tầng đất*: Giám sát tầng đất mặt $0-1cm$.
+  9. *Áp suất thiếu hụt VPD*: Đánh giá thoát hơi nước qua bề mặt mũ nấm.
+  10. *Bức xạ mặt trời*: Năng lượng quang học tức thời ($W/m^2$).
+  11. *Tầm nhìn xa*: Khoảng cách quang đãng tính bằng $km$.
+  12. *Áp suất khí quyển*: Áp suất barometric bề mặt ($hPa$) và xu hướng khí quyển.
 
-### 3. 🗺️ Mạng Lưới 180+ Phường Chuẩn Xác & Toàn Bộ 63 Tỉnh Thành Việt Nam
-- **Cập nhật danh pháp hành chính mới**: Loại bỏ định dạng "quận" cũ lỗi thời, chuẩn hóa theo cấp **Phường / Thành phố trực thuộc**:
-  - *TP. Hồ Chí Minh (61 địa điểm)*: Bến Nghé, Bến Thành, Đa Kao, Tân Định, Phạm Ngũ Lão, Võ Thị Sáu, Thảo Điền, An Phú, Thủ Thiêm, Phú Mỹ Hưng (Tân Phong), Landmark 81 (Phường 22), v.v.
-  - *Thủ đô Hà Nội (17 địa điểm)*: Tràng Tiền, Hàng Bạc, Hàng Đào, Quán Thánh, Điện Biên, Liễu Giai, Dịch Vọng Hậu, Mỹ Đình, Mễ Trì, v.v.
-  - *Đô thị lớn & Du lịch*: Đà Nẵng, Hải Phòng, Cần Thơ, Thừa Thiên Huế, Nha Trang, Đà Lạt, Vũng Tàu, Phú Quốc, Sa Pa.
+### 5. 🗺️ Mạng Lưới 207+ Phường Chuẩn Xác & Toàn Bộ 63 Tỉnh Thành Việt Nam
+- **Cập nhật danh pháp hành chính chuẩn xác nhất**:
+  - *TP. Hồ Chí Minh*: Đầy đủ 100% **toàn bộ 11 phường của Quận 12** (*Phường Thới An, Phường Hiệp Thành, Phường Tân Chánh Hiệp, Phường Thạnh Xuân, Phường Thạnh Lộc, Phường An Phú Đông, Phường Tân Thới Hiệp, Phường Đông Hưng Thuận, Phường Tân Hưng Thuận, Phường Tân Thới Nhất, Phường Trung Mỹ Tây*), cùng các phường Quận 1, Gò Vấp, Tân Phú, Bình Tân, và trung tâm TP. Thủ Đức.
+  - *Thủ đô Hà Nội*: Toàn bộ các phường trọng điểm (Tràng Tiền, Hàng Bạc, Hàng Đào, Quán Thánh, Điện Biên, Liễu Giai, Dịch Vọng Hậu, Mỹ Đình, Mễ Trì, Bách Khoa, v.v.).
   - *Toàn bộ 63 tỉnh thành*: Phủ sóng 100% lãnh thổ Việt Nam với tọa độ WGS84 chính xác.
 - **Bản Đồ Mở Rộng Việt Nam (Dynamic Geocoding)**: Tích hợp công cụ OpenStreetMap Nominatim (`countrycodes=vn`), cho phép tra cứu và lưu bất kỳ phường/xã/thị trấn đặc thù nào trên cả nước chỉ với 1 cú click.
 
-### 4. 🔍 Thuật Toán Tìm Kiếm Mờ Tiếng Việt (Fuse.js Diacritic-Folding)
+### 6. 🔍 Thuật Toán Tìm Kiếm Mờ Tiếng Việt (Fuse.js Diacritic-Folding)
 - Tự động nhận diện từ khóa viết tắt, gõ sai hoặc không dấu:
   - `sapa` ➔ **Sa Pa (Lào Cai)**
   - `da kao` ➔ **Phường Đa Kao (TP.HCM)**

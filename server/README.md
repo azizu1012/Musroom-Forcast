@@ -23,15 +23,21 @@ server/
 Hệ thống sử dụng module `node:sqlite` (`DatabaseSync`) tích hợp sẵn trong Node.js, không phụ thuộc vào công cụ biên dịch C++ (node-gyp):
 
 ### 2.1. Bảng `locations`
-Lưu trữ danh sách địa điểm theo dõi (CRUD):
+Lưu trữ danh sách 207+ địa điểm theo dõi (CRUD) chuẩn đơn vị hành chính Việt Nam mới nhất:
 - `id`: Khóa chính tự tăng (`INTEGER PRIMARY KEY AUTOINCREMENT`)
-- `name`: Tên quận/huyện/thành phố (`TEXT NOT NULL`)
+- `name`: Tên Phường/Xã/Thành phố chuẩn (`TEXT NOT NULL`), ví dụ: **Phường Thới An**, **Phường Hiệp Thành**, **Phường Bến Nghé**, v.v.
 - `latitude`, `longitude`: Tọa độ địa lý chuẩn WGS84 (`REAL NOT NULL`)
-- `admin1`: Tỉnh/thành trực thuộc (`TEXT`)
-- `custom_label`: Nhãn do người dùng gắn (`TEXT`)
+- `admin1`: Tỉnh/thành trực thuộc (`TEXT`), ví dụ: *TP. Hồ Chí Minh*, *TP. Thủ Đức*, *Hà Nội*
+- `region`: Khu vực phân vùng (`TP.HCM`, `Hà Nội`, `Miền Bắc`, `Miền Trung`, `Miền Nam`)
+- `custom_label`: Nhãn do người dùng hoặc hạt giống định danh (`TEXT`)
 - `notes`: Ghi chú cá nhân (`TEXT`)
 - `alert_rain_threshold`: Ngưỡng cảnh báo mưa (`INTEGER DEFAULT 60`)
 - `is_favorite`: Cờ địa điểm ưu tiên (`INTEGER DEFAULT 0`)
+
+> **Chi tiết mạng lưới hành chính hạt giống (Seed Locations):**
+> - **Khu vực TP. Hồ Chí Minh**: Phủ sóng toàn bộ 11 phường của Quận 12 (*Thới An, Hiệp Thành, Tân Chánh Hiệp, Thạnh Xuân, Thạnh Lộc, An Phú Đông, Tân Thới Hiệp, Đông Hưng Thuận, Tân Hưng Thuận, Tân Thới Nhất, Trung Mỹ Tây*), 10 phường Quận 1, 8 phường Gò Vấp, 6 phường Tân Phú & Bình Tân, cùng các phường trung tâm TP. Thủ Đức, Bình Thạnh, Phú Nhuận, Quận 7.
+> - **Khu vực Hà Nội**: Toàn bộ các phường trọng điểm (Tràng Tiền, Hàng Bạc, Quán Thánh, Liễu Giai, Dịch Vọng Hậu, Mễ Trì, Bách Khoa, v.v.).
+> - **63 Tỉnh Thành**: Đầy đủ 100% tọa độ chuẩn WGS84 của tất cả các tỉnh thành và trung tâm kinh tế - du lịch Việt Nam.
 
 ### 2.2. Bảng `weather_snapshots`
 Lưu trữ lịch sử thời tiết phục vụ phân tích xu hướng và đối chiếu 3 năm:

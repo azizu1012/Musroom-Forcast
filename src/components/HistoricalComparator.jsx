@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { History, TrendingUp, TrendingDown, Minus, RefreshCw } from 'lucide-react';
 import { getWeatherMeta } from '../utils/weatherIcons';
+import { fetchHistoricalComparison } from '../services/weatherApi';
 
 export default function HistoricalComparator({ currentCity, lat, lon, currentTemp, unit }) {
   const [data, setData] = useState(null);
@@ -10,11 +11,8 @@ export default function HistoricalComparator({ currentCity, lat, lon, currentTem
     if (!lat || !lon) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/weather/compare-history?lat=${lat}&lon=${lon}&city=${encodeURIComponent(currentCity || '')}`);
-      if (res.ok) {
-        const json = await res.json();
-        setData(json);
-      }
+      const json = await fetchHistoricalComparison(lat, lon, currentCity);
+      setData(json);
     } catch (err) {
       console.error('History fetch error:', err);
     } finally {

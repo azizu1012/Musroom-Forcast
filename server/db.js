@@ -239,16 +239,48 @@ export const VIETNAM_PROVINCES_AND_HUBS = [
   { name: 'Phường 1 (Gò Vấp)', lat: 10.8200, lon: 106.6880, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Đại lộ Phạm Văn Đồng', fav: 0 },
   { name: 'Phường 10 (Gò Vấp)', lat: 10.8350, lon: 106.6710, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'KĐT Cityland / Ngã Sáu', fav: 0 },
 
-  // --- Khu vực Quận 5, 6, 8, 10, Tân Phú, Bình Tân, Quận 12 ---
+  // --- Khu vực Quận 12 (Toàn bộ 11 Phường chuẩn hành chính) ---
+  { name: 'Phường Thới An', lat: 10.8656, lon: 106.6625, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'UBND Quận 12 / Lê Thị Riêng', fav: 0 },
+  { name: 'Phường Hiệp Thành', lat: 10.8750, lon: 106.6430, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Chợ Hiệp Thành / Nguyễn Ảnh Thủ', fav: 0 },
+  { name: 'Phường Tân Chánh Hiệp', lat: 10.8610, lon: 106.6270, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Tô Ký / ĐH GTVT', fav: 0 },
+  { name: 'Phường Thạnh Xuân', lat: 10.8760, lon: 106.6820, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Thạnh Xuân / Hà Huy Giáp', fav: 0 },
+  { name: 'Phường Thạnh Lộc', lat: 10.8710, lon: 106.7020, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Thạnh Lộc / Ngã Tư Ga', fav: 0 },
+  { name: 'Phường An Phú Đông', lat: 10.8520, lon: 106.6980, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'An Phú Đông / Tu Viện Khánh An', fav: 0 },
+  { name: 'Phường Tân Thới Hiệp', lat: 10.8580, lon: 106.6470, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Bệnh Viện Quận 12 / Metro', fav: 0 },
+  { name: 'Phường Đông Hưng Thuận', lat: 10.8400, lon: 106.6260, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Đông Hưng Thuận / Nguyễn Văn Quá', fav: 0 },
+  { name: 'Phường Tân Hưng Thuận', lat: 10.8350, lon: 106.6210, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Tân Hưng Thuận / Song Hành', fav: 0 },
+  { name: 'Phường Tân Thới Nhất', lat: 10.8310, lon: 106.6110, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Tân Thới Nhất / Bà Điểm', fav: 0 },
+  { name: 'Phường Trung Mỹ Tây', lat: 10.8540, lon: 106.6250, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'CV Phần Mềm Quang Trung', fav: 0 },
+
+  // --- Khu vực Gò Vấp mở rộng ---
+  { name: 'Phường 3 (Gò Vấp)', lat: 10.8230, lon: 106.6810, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Công Viên Gia Định', fav: 0 },
+  { name: 'Phường 5 (Gò Vấp)', lat: 10.8280, lon: 106.6910, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Đại Học Công Nghiệp IUH', fav: 0 },
+  { name: 'Phường 7 (Gò Vấp)', lat: 10.8320, lon: 106.6860, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Chợ Gò Vấp', fav: 0 },
+  { name: 'Phường 8 (Gò Vấp)', lat: 10.8390, lon: 106.6540, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Quang Trung / Thống Nhất', fav: 0 },
+  { name: 'Phường 11 (Gò Vấp)', lat: 10.8440, lon: 106.6640, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Thống Nhất / Chùa Nghệ Sĩ', fav: 0 },
+  { name: 'Phường 14 (Gò Vấp)', lat: 10.8520, lon: 106.6510, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Phan Huy Ích', fav: 0 },
+  { name: 'Phường 17 (Gò Vấp)', lat: 10.8560, lon: 106.6810, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'An Nhơn / Nguyễn Oanh', fav: 0 },
+
+  // --- Khu vực Tân Phú & Bình Tân mở rộng ---
+  { name: 'Phường Tây Thạnh', lat: 10.8170, lon: 106.6280, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'KCN Tân Bình', fav: 0 },
+  { name: 'Phường Tân Sơn Nhì', lat: 10.8030, lon: 106.6310, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Tân Sơn Nhì', fav: 0 },
+  { name: 'Phường Tân Quý', lat: 10.7950, lon: 106.6210, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Tân Quý / Gò Dầu', fav: 0 },
+  { name: 'Phường Phú Thọ Hòa', lat: 10.7850, lon: 106.6340, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Lũy Bán Bích / Vải Phú Thọ Hòa', fav: 0 },
+  { name: 'Phường Hòa Thạnh', lat: 10.7760, lon: 106.6380, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'UBND Quận Tân Phú', fav: 0 },
+  { name: 'Phường Bình Hưng Hòa', lat: 10.8010, lon: 106.6020, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Bình Hưng Hòa', fav: 0 },
+  { name: 'Phường Bình Hưng Hòa A', lat: 10.7880, lon: 106.5980, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Lê Trọng Tấn / Tân Kỳ Tân Quý', fav: 0 },
+  { name: 'Phường Tân Tạo', lat: 10.7410, lon: 106.5720, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'KCN Tân Tạo', fav: 0 },
+  { name: 'Phường An Lạc', lat: 10.7380, lon: 106.6090, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Bến xe Miền Tây / Bình Tân', fav: 0 },
+  { name: 'Phường Bình Trị Đông', lat: 10.7440, lon: 106.6120, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Aeon Mall Bình Tân', fav: 0 },
+
+  // --- Khu vực Quận 5, 6, 8, 10, 11 ---
   { name: 'Phường Chợ Lớn', lat: 10.7540, lon: 106.6634, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Phố Người Hoa / Q5', fav: 0 },
   { name: 'Phường 11 (Quận 5)', lat: 10.7565, lon: 106.6600, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'BV Chợ Rẫy / ĐH Y Dược', fav: 0 },
   { name: 'Phường 1 (Quận 6)', lat: 10.7485, lon: 106.6515, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Chợ Bình Tây', fav: 0 },
   { name: 'Phường 4 (Quận 8)', lat: 10.7420, lon: 106.6780, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Cầu Chánh Hưng', fav: 0 },
   { name: 'Phường 12 (Quận 10)', lat: 10.7760, lon: 106.6690, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'TTTM Vạn Hạnh Mall', fav: 0 },
+  { name: 'Phường 15 (Quận 11)', lat: 10.7670, lon: 106.6520, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Công Viên Đầm Sen', fav: 0 },
   { name: 'Phường Sơn Kỳ', lat: 10.8010, lon: 106.6180, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Aeon Mall Tân Phú', fav: 0 },
-  { name: 'Phường An Lạc', lat: 10.7380, lon: 106.6090, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Bến xe Miền Tây / Bình Tân', fav: 0 },
-  { name: 'Phường Bình Trị Đông', lat: 10.7440, lon: 106.6120, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Aeon Mall Bình Tân', fav: 0 },
-  { name: 'Phường Trung Mỹ Tây', lat: 10.8540, lon: 106.6250, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'CV Phần Mềm Quang Trung', fav: 0 },
 
   // --- Khu vực Huyện ngoại thành TP.HCM ---
   { name: 'Thị trấn Cần Giờ', lat: 10.4114, lon: 106.9546, admin1: 'TP. Hồ Chí Minh', region: 'TP.HCM', label: 'Biển Cần Giờ', fav: 0 },
@@ -430,8 +462,7 @@ export function ensureSeedLocations() {
     }
   }
 
-  // Ensure Phường Bến Nghé (TP.HCM) is the top active favorite
-  db.prepare(`UPDATE locations SET is_favorite = 1 WHERE name = 'Phường Bến Nghé'`).run();
+  // Seed completed without forcing hardcoded default location
 }
 
 ensureSeedLocations();

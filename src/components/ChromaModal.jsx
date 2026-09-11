@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, X, Search, Database, RefreshCw, CheckCircle, ArrowRight, Zap, CloudRain } from 'lucide-react';
+import { fetchChromaStatus, syncChromaDatabase, queryChromaVector } from '../services/weatherApi';
 
 export default function ChromaModal({ isOpen, onClose, onSelectCity }) {
   const [query, setQuery] = useState('');
@@ -11,20 +12,17 @@ export default function ChromaModal({ isOpen, onClose, onSelectCity }) {
 
   useEffect(() => {
     if (isOpen) {
-      fetchStatus();
+      loadStatus();
       if (results.length === 0) {
         handleSearch('độ ẩm cao thích hợp trồng nấm');
       }
     }
   }, [isOpen]);
 
-  const fetchStatus = async () => {
+  const loadStatus = async () => {
     try {
-      const res = await fetch('/api/chroma/status');
-      if (res.ok) {
-        const data = await res.json();
-        setStatus(data);
-      }
+      const data = await fetchChromaStatus();
+      setStatus(data);
     } catch (err) {
       console.warn('Failed to fetch Chroma status');
     }
@@ -36,15 +34,8 @@ export default function ChromaModal({ isOpen, onClose, onSelectCity }) {
     setLoading(true);
     setSyncMessage('');
     try {
-      const res = await fetch('/api/chroma/query', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: q.trim(), limit: 6 })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setResults(data.results || []);
-      }
+      const data = await queryChromaVector(q.trim(), 6);
+      setResults(data.results || []);
     } catch (err) {
       console.error('Chroma query error:', err);
     } finally {
@@ -55,12 +46,9 @@ export default function ChromaModal({ isOpen, onClose, onSelectCity }) {
   const handleSyncAll = async () => {
     setSyncing(true);
     try {
-      const res = await fetch('/api/chroma/sync', { method: 'POST' });
-      if (res.ok) {
-        const data = await res.json();
-        setSyncMessage(`Đã đồng bộ ${data.totalSynced} bản ghi thời tiết vào ChromaDB Vector!`);
-        fetchStatus();
-      }
+      const data = await syncChromaDatabase();
+      setSyncMessage(`Đã đồng bộ ${data.totalSynced} bản ghi thời tiết vào ChromaDB Vector!`);
+      loadStatus();
     } catch (err) {
       setSyncMessage('Đồng bộ thất bại');
     } finally {
