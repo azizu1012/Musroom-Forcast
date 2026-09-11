@@ -672,3 +672,411 @@ body {
   align-items: center;
   gap: 0.5rem;
 }
+
+/* =========================================================================
+   MUSHROOM AGRO & SOIL CLIMATE INTELLIGENCE SYSTEM
+   ========================================================================= */
+.mushroom-agro-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+
+.mushroom-section-header {
+  background: var(--glass-material);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-widget);
+  padding: 1.15rem 1.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.mushroom-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.mushroom-header-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mushroom-section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+.mushroom-section-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.15rem;
+}
+
+.mushroom-score-pill {
+  border: 1px solid;
+  border-radius: 16px;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.mushroom-score-num {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.mushroom-score-num span {
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.mushroom-score-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.mushroom-advisory-card {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(52, 211, 153, 0.08));
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: 18px;
+  padding: 0.9rem 1.2rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.mushroom-advisory-icon {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.mushroom-advisory-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #38bdf8;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.mushroom-advisory-body {
+  font-size: 0.88rem;
+  color: #f1f5f9;
+  margin-top: 0.25rem;
+  line-height: 1.45;
+}
+
+.mushroom-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0.85rem;
+}
+
+.mushroom-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* VPD Track */
+.vpd-track-container {
+  position: relative;
+  margin-top: 0.75rem;
+  height: 24px;
+}
+
+.vpd-track {
+  height: 14px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  overflow: hidden;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #030712;
+}
+
+.vpd-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.vpd-zone-wet {
+  width: 25%;
+  background: #38bdf8;
+}
+
+.vpd-zone-ideal {
+  width: 45%;
+  background: #34d399;
+}
+
+.vpd-zone-dry {
+  width: 30%;
+  background: #fb923c;
+}
+
+.vpd-needle {
+  position: absolute;
+  top: -3px;
+  width: 14px;
+  height: 20px;
+  background: #ffffff;
+  border: 2px solid #030712;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  transform: translateX(-50%);
+  transition: left 0.4s ease;
+}
+
+/* Soil Layers */
+.soil-layers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+
+.soil-layer-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.soil-layer-info {
+  width: 145px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.soil-layer-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.soil-layer-note {
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+}
+
+.soil-layer-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.soil-layer-bar {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width 0.6s ease;
+}
+
+.soil-layer-val {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  width: 44px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Temp Box */
+.temp-metric-box {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 0.75rem 0.85rem;
+}
+
+.temp-box-label {
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+  font-weight: 600;
+}
+
+.temp-box-val {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0.2rem 0;
+}
+
+.temp-box-sub {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+}
+
+/* Species Compatibility Hub */
+.mushroom-species-section {
+  background: var(--glass-material);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-widget);
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mushroom-species-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.75rem;
+}
+
+.mushroom-species-pills {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+}
+
+.species-pill-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-pill);
+  padding: 0.45rem 0.9rem;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.species-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.species-pill-btn.active {
+  background: rgba(52, 211, 153, 0.18);
+  border-color: rgba(52, 211, 153, 0.45);
+  color: #34d399;
+}
+
+.species-pill-score {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.species-detail-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.species-detail-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.species-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.species-sci {
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--text-tertiary);
+}
+
+.species-tag {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+.species-score-circle {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 2px solid #34d399;
+  background: rgba(52, 211, 153, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #34d399;
+}
+
+.species-score-val {
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.species-score-pct {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.species-requirements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.65rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 0.75rem 0.95rem;
+}
+
+.species-req-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.req-label {
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
+.req-val {
+  font-size: 0.88rem;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.species-note-box {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.65rem 0.9rem;
+  border-radius: 10px;
+}

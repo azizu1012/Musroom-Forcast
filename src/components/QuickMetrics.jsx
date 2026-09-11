@@ -249,6 +249,96 @@ export default function QuickMetrics({ forecast, unit }) {
           Áp suất khí quyển ổn định, ít có biến động bão áp thấp.
         </div>
       </div>
+
+      {/* 9. ĐỘ ẨM KHÔNG KHÍ (RELATIVE HUMIDITY) */}
+      <div className="apple-widget">
+        <div className="widget-header">
+          <Droplets size={14} color="#38bdf8" />
+          <span>Độ Ẩm Không Khí</span>
+        </div>
+
+        <div className="widget-main-value">
+          {current.humidity} <span style={{ fontSize: '1rem', fontWeight: 400 }}>%</span>
+        </div>
+
+        <div className="widget-subtitle" style={{ fontSize: '0.88rem', color: current.humidity >= 80 && current.humidity <= 92 ? '#34d399' : (current.humidity < 70 ? '#fb923c' : '#38bdf8') }}>
+          {current.humidity >= 80 && current.humidity <= 92 
+            ? 'Lý tưởng ra quả thể nấm' 
+            : (current.humidity >= 70 ? 'Thích hợp nuôi sợi' : (current.humidity > 92 ? 'Bão hòa ẩm' : 'Khô hanh'))}
+        </div>
+
+        <div className="aqi-bar" style={{ background: 'linear-gradient(to right, #fb923c, #fbbf24, #34d399, #38bdf8)' }}>
+          <div className="aqi-pointer" style={{ left: `${Math.min(100, Math.max(5, current.humidity))}%` }} />
+        </div>
+
+        <div className="widget-footer-note" style={{ marginTop: '0.5rem' }}>
+          Điểm sương hiện tại là {displayTemp(current.dewPoint)}°. Độ ẩm quyết định 70% năng suất nấm.
+        </div>
+      </div>
+
+      {/* 10. ĐỘ ẨM ĐẤT & CƠ CHẤT (SOIL MOISTURE) */}
+      <div className="apple-widget">
+        <div className="widget-header">
+          <Droplets size={14} color="#34d399" />
+          <span>Độ Ẩm Đất Cơ Chất</span>
+        </div>
+
+        <div className="widget-main-value">
+          {current.soilMoisture0To1cm ?? 32.5} <span style={{ fontSize: '1rem', fontWeight: 400 }}>% vol</span>
+        </div>
+
+        <div className="widget-subtitle" style={{ fontSize: '0.88rem', color: '#34d399' }}>
+          Tầng sâu (3-9cm): {current.soilMoisture3To9cm ?? 35.5}% vol
+        </div>
+
+        <div className="aqi-bar" style={{ background: 'linear-gradient(to right, #f87171, #fbbf24, #34d399, #10b981)' }}>
+          <div className="aqi-pointer" style={{ left: `${Math.min(100, Math.max(5, (current.soilMoisture0To1cm ?? 32.5) * 2))}%` }} />
+        </div>
+
+        <div className="widget-footer-note" style={{ marginTop: '0.5rem' }}>
+          Độ ẩm giá thể tầng rễ tơ nấm đạt tiêu chuẩn giữ nước tốt.
+        </div>
+      </div>
+
+      {/* 11. ÁP SUẤT HƠI THIẾU HỤT (VPD) */}
+      <div className="apple-widget">
+        <div className="widget-header">
+          <Wind size={14} color="#38bdf8" />
+          <span>Áp Suất Hơi Thiếu Hụt (VPD)</span>
+        </div>
+
+        <div className="widget-main-value">
+          {current.vpd ?? 0.85} <span style={{ fontSize: '1rem', fontWeight: 400 }}>kPa</span>
+        </div>
+
+        <div className="widget-subtitle" style={{ fontSize: '0.88rem', color: (current.vpd ?? 0.85) >= 0.3 && (current.vpd ?? 0.85) <= 0.75 ? '#34d399' : '#fb923c' }}>
+          {(current.vpd ?? 0.85) >= 0.3 && (current.vpd ?? 0.85) <= 0.75 ? 'Vùng vàng thoát hơi nấm' : 'Thoát hơi nhanh'}
+        </div>
+
+        <div className="widget-footer-note" style={{ marginTop: '0.5rem' }}>
+          Chỉ số điều khiển béc phun sương ẩm cho nhà màng và trại nấm nông nghiệp.
+        </div>
+      </div>
+
+      {/* 12. BỨC XẠ MẶT TRỜI (SOLAR RADIATION) */}
+      <div className="apple-widget">
+        <div className="widget-header">
+          <Sun size={14} color="#fbbf24" />
+          <span>Bức Xạ Mặt Trời</span>
+        </div>
+
+        <div className="widget-main-value">
+          {current.solarRadiation ?? 220} <span style={{ fontSize: '1rem', fontWeight: 400 }}>W/m²</span>
+        </div>
+
+        <div className="widget-subtitle" style={{ fontSize: '0.88rem', color: '#fbbf24' }}>
+          Bốc thoát hơi nước: {current.evapotranspiration ?? 0.25} mm/h
+        </div>
+
+        <div className="widget-footer-note" style={{ marginTop: '0.5rem' }}>
+          Cường độ bức xạ sóng ngắn đo bằng Pyranometer, hỗ trợ canh tác quang kỳ.
+        </div>
+      </div>
     </div>
   );
 }

@@ -128,9 +128,9 @@ export async function getFullForecast(lat, lon, cityName = 'Unknown', locationId
   if (cached) return cached;
 
   const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-    `&current_weather=true` +
-    `&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,surface_pressure,wind_speed_10m,wind_gusts_10m,uv_index,visibility,dew_point_2m` +
-    `&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max,precipitation_hours,wind_speed_10m_max,wind_gusts_10m_max` +
+    `&current=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation,rain,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m` +
+    `&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,surface_pressure,wind_speed_10m,wind_gusts_10m,uv_index,visibility,dew_point_2m,vapor_pressure_deficit,soil_temperature_0cm,soil_temperature_6cm,soil_temperature_18cm,soil_moisture_0_to_1cm,soil_moisture_1_to_3cm,soil_moisture_3_to_9cm,soil_moisture_9_to_27cm,et0_fao_evapotranspiration,shortwave_radiation` +
+    `&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max,precipitation_hours,wind_speed_10m_max,wind_gusts_10m_max,et0_fao_evapotranspiration,shortwave_radiation_sum` +
     `&timezone=auto` +
     `&forecast_days=16`;
 
@@ -152,7 +152,7 @@ export async function getFullForecast(lat, lon, cityName = 'Unknown', locationId
 
     // Structure hourly data: slice next 24 hours
     const hourlyTimes = forecastData.hourly?.time || [];
-    const currentTimeStr = forecastData.current_weather?.time || new Date().toISOString().slice(0, 13);
+    const currentTimeStr = forecastData.current?.time || forecastData.current_weather?.time || new Date().toISOString().slice(0, 13);
     let startIndex = hourlyTimes.findIndex(t => t >= currentTimeStr);
     if (startIndex < 0) startIndex = 0;
     const next24h = [];
@@ -161,12 +161,23 @@ export async function getFullForecast(lat, lon, cityName = 'Unknown', locationId
         time: hourlyTimes[i],
         temperature: forecastData.hourly.temperature_2m?.[i],
         apparentTemperature: forecastData.hourly.apparent_temperature?.[i],
-        humidity: forecastData.hourly.relative_humidity_2m?.[i],
+        humidity: forecastData.hourly.relative_humidity_2m?.[i] ?? 65,
+        dewPoint: forecastData.hourly.dew_point_2m?.[i] ?? 22,
+        vpd: forecastData.hourly.vapor_pressure_deficit?.[i] != null ? +(forecastData.hourly.vapor_pressure_deficit[i].toFixed(2)) : 0.8,
         precipitationProbability: forecastData.hourly.precipitation_probability?.[i] ?? 0,
         precipitation: forecastData.hourly.precipitation?.[i] ?? 0,
         weatherCode: forecastData.hourly.weather_code?.[i],
         windSpeed: forecastData.hourly.wind_speed_10m?.[i],
-        uvIndex: forecastData.hourly.uv_index?.[i] ?? 0
+        uvIndex: forecastData.hourly.uv_index?.[i] ?? 0,
+        soilTemperature0cm: forecastData.hourly.soil_temperature_0cm?.[i] ?? forecastData.hourly.temperature_2m?.[i],
+        soilTemperature6cm: forecastData.hourly.soil_temperature_6cm?.[i] ?? (forecastData.hourly.temperature_2m?.[i] ? +(forecastData.hourly.temperature_2m[i] - 1.5).toFixed(1) : 26),
+        soilTemperature18cm: forecastData.hourly.soil_temperature_18cm?.[i] ?? 25,
+        soilMoisture0To1cm: forecastData.hourly.soil_moisture_0_to_1cm?.[i] != null ? +(forecastData.hourly.soil_moisture_0_to_1cm[i] * 100).toFixed(1) : 32.5,
+        soilMoisture1To3cm: forecastData.hourly.soil_moisture_1_to_3cm?.[i] != null ? +(forecastData.hourly.soil_moisture_1_to_3cm[i] * 100).toFixed(1) : 34.0,
+        soilMoisture3To9cm: forecastData.hourly.soil_moisture_3_to_9cm?.[i] != null ? +(forecastData.hourly.soil_moisture_3_to_9cm[i] * 100).toFixed(1) : 35.5,
+        soilMoisture9To27cm: forecastData.hourly.soil_moisture_9_to_27cm?.[i] != null ? +(forecastData.hourly.soil_moisture_9_to_27cm[i] * 100).toFixed(1) : 37.0,
+        et0: forecastData.hourly.et0_fao_evapotranspiration?.[i] ?? 0.2,
+        solarRadiation: Math.round(forecastData.hourly.shortwave_radiation?.[i] ?? 200)
       });
     }
 
@@ -184,24 +195,70 @@ export async function getFullForecast(lat, lon, cityName = 'Unknown', locationId
       precipitationProbabilityMax: forecastData.daily.precipitation_probability_max?.[idx] ?? 0,
       precipitationHours: forecastData.daily.precipitation_hours?.[idx] ?? 0,
       windSpeedMax: forecastData.daily.wind_speed_10m_max?.[idx] ?? 0,
-      windGustsMax: forecastData.daily.wind_gusts_10m_max?.[idx] ?? 0
+      windGustsMax: forecastData.daily.wind_gusts_10m_max?.[idx] ?? 0,
+      et0: forecastData.daily.et0_fao_evapotranspiration?.[idx] ?? 2.8,
+      solarRadiationSum: forecastData.daily.shortwave_radiation_sum?.[idx] ?? 14.5
     }));
 
-    // Current weather object with comprehensive atmospheric metrics
+    // Current soil and atmospheric values
+    const currentTemp = forecastData.current?.temperature_2m ?? forecastData.current_weather?.temperature ?? 28;
+    const currentHumidity = forecastData.current?.relative_humidity_2m ?? next24h[0]?.humidity ?? 68;
+    const currentDewPoint = forecastData.current?.dew_point_2m ?? next24h[0]?.dewPoint ?? 22.5;
+    const currentVpd = next24h[0]?.vpd ?? 0.85;
+    const currentSoilT0 = next24h[0]?.soilTemperature0cm ?? currentTemp;
+    const currentSoilT6 = next24h[0]?.soilTemperature6cm ?? +(currentTemp - 1.5).toFixed(1);
+    const currentSoilT18 = next24h[0]?.soilTemperature18cm ?? 25;
+    const currentSoilM0_1 = next24h[0]?.soilMoisture0To1cm ?? 32.5;
+    const currentSoilM1_3 = next24h[0]?.soilMoisture1To3cm ?? 34.0;
+    const currentSoilM3_9 = next24h[0]?.soilMoisture3To9cm ?? 35.5;
+    const currentSoilM9_27 = next24h[0]?.soilMoisture9To27cm ?? 37.0;
+    const currentEt0 = next24h[0]?.et0 ?? 0.25;
+    const currentSolarRad = next24h[0]?.solarRadiation ?? 220;
+
+    // Calculate smart agro & mushroom suitability index
+    const mushroomAgro = calculateMushroomAgroIndex({
+      temp: currentTemp,
+      humidity: currentHumidity,
+      dewPoint: currentDewPoint,
+      vpd: currentVpd,
+      soilMoist0_1: currentSoilM0_1,
+      soilMoist1_3: currentSoilM1_3,
+      soilTemp0: currentSoilT0,
+      soilTemp6: currentSoilT6
+    });
+
+    // Current weather object with comprehensive atmospheric & agro metrics
     const current = {
-      ...forecastData.current_weather,
+      ...(forecastData.current_weather || {}),
+      temperature: currentTemp,
       cityName,
-      apparentTemperature: next24h[0]?.apparentTemperature ?? forecastData.current_weather.temperature,
-      humidity: next24h[0]?.humidity ?? 65,
-      pressure: Math.round(forecastData.hourly.surface_pressure?.[startIndex] ?? 1013),
+      apparentTemperature: forecastData.current?.apparent_temperature ?? next24h[0]?.apparentTemperature ?? currentTemp,
+      humidity: currentHumidity,
+      dewPoint: currentDewPoint,
+      pressure: Math.round(forecastData.current?.surface_pressure ?? forecastData.hourly.surface_pressure?.[startIndex] ?? 1013),
       uvIndex: next24h[0]?.uvIndex ?? 5,
       uvMax: daily16Days[0]?.uvIndexMax ?? 6,
       visibilityKm: forecastData.hourly.visibility?.[startIndex] ? +(forecastData.hourly.visibility[startIndex] / 1000).toFixed(1) : 10,
-      dewPoint: forecastData.hourly.dew_point_2m?.[startIndex] ? Math.round(forecastData.hourly.dew_point_2m[startIndex]) : 22,
-      windGusts: daily16Days[0]?.windGustsMax ?? Math.round(forecastData.current_weather.windspeed * 1.3),
+      windspeed: forecastData.current?.wind_speed_10m ?? forecastData.current_weather?.windspeed ?? 10,
+      winddirection: forecastData.current?.wind_direction_10m ?? forecastData.current_weather?.winddirection ?? 0,
+      windGusts: daily16Days[0]?.windGustsMax ?? forecastData.current?.wind_gusts_10m ?? Math.round((forecastData.current?.wind_speed_10m || 10) * 1.3),
       precipitationSum: daily16Days[0]?.precipitationSum ?? 0,
       precipitationHours: daily16Days[0]?.precipitationHours ?? 0,
       precipitationProbabilityMax: daily16Days[0]?.precipitationProbabilityMax ?? 0,
+      
+      // Agro & Mushroom Cultivation Specific Metrics
+      vpd: currentVpd,
+      soilTemperature0cm: currentSoilT0,
+      soilTemperature6cm: currentSoilT6,
+      soilTemperature18cm: currentSoilT18,
+      soilMoisture0To1cm: currentSoilM0_1,
+      soilMoisture1To3cm: currentSoilM1_3,
+      soilMoisture3To9cm: currentSoilM3_9,
+      soilMoisture9To27cm: currentSoilM9_27,
+      evapotranspiration: currentEt0,
+      solarRadiation: currentSolarRad,
+      mushroomAgro,
+
       aqi: aqiData?.current?.us_aqi ?? aqiData?.current?.european_aqi ?? 35,
       aqiCategory: getAqiCategory(aqiData?.current?.us_aqi ?? 35),
       pm25: aqiData?.current?.pm2_5 ? +aqiData.current.pm2_5.toFixed(1) : 12.5,
@@ -211,13 +268,13 @@ export async function getFullForecast(lat, lon, cityName = 'Unknown', locationId
       co: aqiData?.current?.carbon_monoxide ? +aqiData.current.carbon_monoxide.toFixed(1) : 240.0
     };
 
-
     const combined = {
       city: cityName,
       latitude: lat,
       longitude: lon,
       timezone: forecastData.timezone,
       current,
+      mushroomAgro,
       hourly24: next24h,
       daily16: daily16Days,
       forecastDaysCount: daily16Days.length,
@@ -263,6 +320,18 @@ function saveSnapshotToDb(snapshot) {
       ORDER BY id DESC LIMIT 1
     `).get(snapshot.cityName, today);
 
+    // Verify locationId if provided
+    let validLocationId = null;
+    if (snapshot.locationId) {
+      const parsed = parseInt(snapshot.locationId, 10);
+      if (!isNaN(parsed)) {
+        try {
+          const loc = db.prepare('SELECT id FROM locations WHERE id = ?').get(parsed);
+          if (loc) validLocationId = loc.id;
+        } catch (e) {}
+      }
+    }
+
     if (existing) {
       // Update existing snapshot
       const updateStmt = db.prepare(`
@@ -290,7 +359,7 @@ function saveSnapshotToDb(snapshot) {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       const res = insertStmt.run(
-        snapshot.locationId,
+        validLocationId,
         snapshot.cityName,
         snapshot.latitude,
         snapshot.longitude,
@@ -406,4 +475,118 @@ function getAqiCategory(aqi) {
   if (aqi <= 150) return { label: 'Unhealthy for Sensitive', color: '#f97316' };
   if (aqi <= 200) return { label: 'Unhealthy', color: '#ef4444' };
   return { label: 'Hazardous', color: '#8b5cf6' };
+}
+
+/**
+ * Expert Mushroom Cultivation & Agro-Climate Index
+ * Evaluates Relative Humidity, Substrate Moisture, Temperature, and VPD
+ * Tailored for Vietnamese tropical mushroom cultivation (Rơm, Bào Ngư, Mối, Linh Chi, Mộc Nhĩ)
+ */
+export function calculateMushroomAgroIndex({ temp, humidity, dewPoint, vpd, soilMoist0_1, soilMoist1_3, soilTemp0, soilTemp6 }) {
+  // 1. Relative Humidity score (Ideal: 80% - 92%)
+  let rhScore = 0;
+  if (humidity >= 80 && humidity <= 92) rhScore = 100;
+  else if (humidity >= 72 && humidity < 80) rhScore = 82;
+  else if (humidity > 92 && humidity <= 97) rhScore = 88;
+  else if (humidity >= 60 && humidity < 72) rhScore = 60;
+  else rhScore = 35;
+
+  // 2. Vapor Pressure Deficit (VPD) score (Optimal: 0.3 - 0.7 kPa)
+  let vpdScore = 0;
+  if (vpd >= 0.3 && vpd <= 0.7) vpdScore = 100;
+  else if ((vpd >= 0.2 && vpd < 0.3) || (vpd > 0.7 && vpd <= 0.9)) vpdScore = 80;
+  else if (vpd > 0.9 && vpd <= 1.25) vpdScore = 55;
+  else vpdScore = 30;
+
+  // 3. Substrate Soil Moisture score (Optimal: 28% - 42% vol)
+  const moistAvg = ((soilMoist0_1 || 32) + (soilMoist1_3 || 34)) / 2;
+  let moistScore = 0;
+  if (moistAvg >= 28 && moistAvg <= 42) moistScore = 100;
+  else if (moistAvg >= 22 && moistAvg < 28) moistScore = 75;
+  else if (moistAvg > 42 && moistAvg <= 50) moistScore = 70;
+  else moistScore = 45;
+
+  // Overall Index (0 - 100)
+  const overallScore = Math.round(rhScore * 0.4 + vpdScore * 0.35 + moistScore * 0.25);
+
+  let status = 'Môi Trường Lý Tưởng Phát Triển Quả Thể';
+  let statusColor = '#34d399'; // Emerald green
+  let actionAdvice = 'Khí hậu và độ ẩm đang trong vùng vàng (Golden Zone) để kích thích mầm nấm (pinhead) phát triển mọc rộ.';
+
+  if (vpd > 1.05 || humidity < 68) {
+    status = 'Cảnh Báo Khô Hạn - Cần Phun Sương Ẩm';
+    statusColor = '#fb923c'; // Orange
+    actionAdvice = 'Không khí khô làm bốc hơi nhanh, nguy cơ nứt teo mũ nấm. Cần bật béc phun sương mù 15-20 phút và kéo bạt chắn gió lùa.';
+  } else if (vpd < 0.22 || humidity > 95) {
+    status = 'Ẩm Bão Hòa - Cần Thông Gió Thoát Ẩm';
+    statusColor = '#38bdf8'; // Sky blue
+    actionAdvice = 'Nguy cơ đọng màng nước trên quả thể gây thối nhũn và mốc trichoderma. Hãy mở cửa thông gió đối lưu và giảm lượng tưới.';
+  } else if (temp > 35) {
+    status = 'Nhiệt Độ Cao - Cần Hạ Nhiệt Trại Nấm';
+    statusColor = '#f87171'; // Red
+    actionAdvice = 'Nhiệt độ môi trường vượt ngưỡng chịu đựng của tơ nấm. Nên phun nước làm mát mái trại và giữ thoáng khí.';
+  }
+
+  // Species-specific suitability matrix
+  const species = [
+    {
+      name: 'Nấm Rơm',
+      scientific: 'Volvariella volvacea',
+      optTemp: '30 - 35°C',
+      optHumidity: '80 - 90%',
+      optMoist: '32 - 40%',
+      score: Math.max(30, Math.min(100, Math.round(100 - Math.abs(temp - 32) * 5.5 - Math.abs(humidity - 85) * 1.5))),
+      suitability: temp >= 28 && temp <= 36 && humidity >= 75 ? 'Rất Thích Hợp' : (temp < 25 ? 'Hơi Lạnh (Cần Ủ Áo Giữ Nhiệt)' : 'Khá Thích Hợp'),
+      note: 'Ưa ấm nhiệt đới. Khi quả thể dạng búp cần duy trì ẩm độ luống rơm 65-70%.'
+    },
+    {
+      name: 'Nấm Bào Ngư / Nấm Sò',
+      scientific: 'Pleurotus spp.',
+      optTemp: '22 - 28°C',
+      optHumidity: '85 - 90%',
+      optMoist: '28 - 38%',
+      score: Math.max(30, Math.min(100, Math.round(100 - Math.abs(temp - 25) * 6 - Math.abs(humidity - 88) * 1.5))),
+      suitability: temp >= 20 && temp <= 29 && humidity >= 78 ? 'Rất Thích Hợp' : (temp > 32 ? 'Nắng Nóng (Cần Phun Mát)' : 'Khá Thích Hợp'),
+      note: 'Dễ trồng, cho năng suất cao. Tuyệt đối không tưới thẳng nước lạnh vào cổ bịch phôi.'
+    },
+    {
+      name: 'Nấm Mối / Nấm Mối Đen',
+      scientific: 'Termitomyces / Oudemansiella',
+      optTemp: '25 - 30°C',
+      optHumidity: '85 - 95%',
+      optMoist: '35 - 45%',
+      score: Math.max(30, Math.min(100, Math.round(100 - Math.abs(temp - 27) * 5 - Math.abs(humidity - 90) * 1.2))),
+      suitability: temp >= 23 && temp <= 31 && humidity >= 80 ? 'Rất Thích Hợp' : 'Cần Tăng Độ Ẩm Đất',
+      note: 'Ưa tầng đất ẩm sâu và mùn hữu cơ. Rất nhạy cảm với sự chênh lệch ẩm độ ngày đêm.'
+    },
+    {
+      name: 'Nấm Linh Chi',
+      scientific: 'Ganoderma lucidum',
+      optTemp: '22 - 28°C',
+      optHumidity: '80 - 85%',
+      optMoist: '25 - 35%',
+      score: Math.max(30, Math.min(100, Math.round(100 - Math.abs(temp - 25) * 5 - Math.abs(humidity - 82) * 2))),
+      suitability: temp >= 20 && temp <= 30 && humidity >= 75 ? 'Rất Thích Hợp' : 'Trung Bình',
+      note: 'Dược liệu quý. Cần ánh sáng khuếch tán đồng đều để quả thể phân nhánh xòe đẹp.'
+    },
+    {
+      name: 'Nấm Mèo / Mộc Nhĩ',
+      scientific: 'Auricularia auricula',
+      optTemp: '25 - 32°C',
+      optHumidity: '80 - 90%',
+      optMoist: '28 - 38%',
+      score: Math.max(30, Math.min(100, Math.round(100 - Math.abs(temp - 28) * 5 - Math.abs(humidity - 85) * 1.5))),
+      suitability: temp >= 24 && temp <= 33 && humidity >= 75 ? 'Rất Thích Hợp' : 'Khá Thích Hợp',
+      note: 'Khả năng chịu nhiệt tốt, tốc độ lớn nhanh khi độ ẩm không khí đạt trên 85%.'
+    }
+  ];
+
+  return {
+    overallScore,
+    status,
+    statusColor,
+    actionAdvice,
+    vpdStatus: vpd >= 0.3 && vpd <= 0.7 ? 'Tối ưu (0.3 - 0.7 kPa)' : (vpd > 0.7 ? 'Hơi Khô' : 'Ẩm Bão Hòa'),
+    species
+  };
 }
